@@ -2,7 +2,10 @@ package com.strikerkk.aicommerce.user_service.controller;
 
 import com.strikerkk.aicommerce.user_service.common.ApiResponse;
 import com.strikerkk.aicommerce.user_service.dto.request.CreateUserRequest;
+import com.strikerkk.aicommerce.user_service.dto.request.LoginUserRequest;
+import com.strikerkk.aicommerce.user_service.dto.response.AuthResponse;
 import com.strikerkk.aicommerce.user_service.dto.response.UserResponse;
+import com.strikerkk.aicommerce.user_service.service.AuthService;
 import com.strikerkk.aicommerce.user_service.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<UserResponse>> userRegistration(
@@ -26,6 +30,17 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("User created successfully", userResponse));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> userLogin(
+            @Valid @RequestBody LoginUserRequest request) {
+
+        AuthResponse authResponse = authService.loginUser(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Login successful", authResponse));
     }
 
 }

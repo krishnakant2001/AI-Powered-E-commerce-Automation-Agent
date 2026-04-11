@@ -1,6 +1,7 @@
 package com.strikerkk.aicommerce.user_service.security.model;
 
 import com.strikerkk.aicommerce.user_service.entity.User;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+@Data
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 

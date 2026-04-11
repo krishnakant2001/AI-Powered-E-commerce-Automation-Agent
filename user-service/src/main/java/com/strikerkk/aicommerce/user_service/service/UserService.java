@@ -2,6 +2,7 @@ package com.strikerkk.aicommerce.user_service.service;
 
 import com.strikerkk.aicommerce.user_service.dto.request.CreateUserRequest;
 import com.strikerkk.aicommerce.user_service.dto.response.UserResponse;
+import com.strikerkk.aicommerce.user_service.exception.BadRequestException;
 import com.strikerkk.aicommerce.user_service.security.model.CustomUserDetails;
 import com.strikerkk.aicommerce.user_service.entity.User;
 import com.strikerkk.aicommerce.user_service.repository.UserRepository;
@@ -39,7 +40,7 @@ public class UserService implements UserDetailsService {
 
         //Check email is already present or not
         if(userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("User with email " + request.getEmail() + " is already registered");
+            throw new BadRequestException("User with email " + request.getEmail() + " is already registered");
         }
 
         //Create new user

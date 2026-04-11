@@ -1,14 +1,18 @@
 package com.strikerkk.aicommerce.user_service.exception.advice;
 
 import com.strikerkk.aicommerce.user_service.common.ApiResponse;
+import com.strikerkk.aicommerce.user_service.common.ErrorResponse;
 import com.strikerkk.aicommerce.user_service.exception.BadRequestException;
 import com.strikerkk.aicommerce.user_service.exception.ResourceNotFoundException;
 import com.strikerkk.aicommerce.user_service.exception.UnauthorizedException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -51,12 +55,22 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.UNAUTHORIZED)
+                .error("Invalid email or password")
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
 
     // Catch all errors
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneral(RuntimeException ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Something went wrong!"));
+                .body(ApiResponse.error(!ex.getMessage().isEmpty() ? ex.getMessage() : "Something went wrong!"));
     }
 }
