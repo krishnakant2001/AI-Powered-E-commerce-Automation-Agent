@@ -37,17 +37,18 @@ public class User {
     @Column(name = "phone_number", length = 15)
     private String phoneNumber;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Address> addresses = new ArrayList<>();
-//    orphanRemoval: If you remove an address from the list → delete it from DB too
-//    cascade: If you save/delete a User → automatically save/delete their addresses too
-
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Address> addresses = new ArrayList<>();
+
+    // OrphanRemoval: If you remove an address from the list → delete it from DB too
+    // Cascade: If you save/delete a User → automatically save/delete their addresses too
 
 
     @PrePersist

@@ -1,6 +1,6 @@
 package com.strikerkk.aicommerce.user_service.service;
 
-import com.strikerkk.aicommerce.user_service.dto.request.AddNewAddressRequest;
+import com.strikerkk.aicommerce.user_service.dto.request.AddressRequest;
 import com.strikerkk.aicommerce.user_service.dto.response.AddressResponse;
 import com.strikerkk.aicommerce.user_service.entity.Address;
 import com.strikerkk.aicommerce.user_service.entity.User;
@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -20,7 +23,7 @@ public class AddressService {
     private final AddressRepository addressRepository;
     private final ModelMapper modelMapper;
 
-    public AddressResponse addAddress(AddNewAddressRequest request, String userId) {
+    public AddressResponse addAddress(AddressRequest request, String userId) {
 
         User user = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -43,4 +46,49 @@ public class AddressService {
     }
 
 
+    public List<AddressResponse> allAddresses(String userId) {
+
+        List<Address> addressList = addressRepository.findAllByUserId(Long.valueOf(userId));
+
+        return addressList
+                .stream()
+                .map(address -> modelMapper.map(address, AddressResponse.class))
+                .toList();
+    }
+
+
+    public AddressResponse updateAddress(AddressRequest request, Long addressId, String userId) {
+
+        Address address = addressRepository.findByIdAndUserId(addressId, Long.valueOf(userId))
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+
+        address.setHouseNo(request.getHouseNo());
+        address.setStreet(request.getStreet());
+        address.setCity(request.getCity());
+        address.setState(request.getState());
+        address.setCountry(request.getCountry());
+        address.setPinCode(request.getPinCode());
+
+        // If users update this address to default, set all others for this user to false
+        if (Boolean.TRUE.equals(request.getIsDefault())) {
+            addressRepository.resetOtherAddresses(Long.valueOf(userId), addressId);
+            address.setIsDefault(true);
+
+        } else if (request.getIsDefault() != null) {
+            address.setIsDefault(false);
+        }
+
+        Address saved = addressRepository.save(address);
+
+        return modelMapper.map(saved, AddressResponse.class);
+    }
+
+
+    public void deleteAddress(Long addressId, String userId) {
+
+        Address address = addressRepository.findByIdAndUserId(addressId, Long.valueOf(userId))
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+
+        addressRepository.delete(address);
+    }
 }

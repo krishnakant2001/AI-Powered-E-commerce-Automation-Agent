@@ -57,4 +57,12 @@ public class UserService implements UserDetailsService {
 
         return modelMapper.map(savedUser, UserResponse.class);
     }
+
+    public UserResponse userDetails(String userId) {
+
+        User user = userRepository.findById(Long.valueOf(userId))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return modelMapper.map(user, UserResponse.class);
+    }
 }
