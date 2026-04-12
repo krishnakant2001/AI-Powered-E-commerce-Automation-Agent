@@ -47,7 +47,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
             final String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
-            if(authHeader == null || !authHeader.startsWith("Bearer")) {
+            if(authHeader == null || !authHeader.startsWith("Bearer ")) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }

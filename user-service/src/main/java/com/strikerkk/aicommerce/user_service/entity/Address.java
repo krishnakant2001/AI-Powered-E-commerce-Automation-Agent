@@ -6,6 +6,8 @@ import lombok.*;
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "user_address")
 public class Address {
 

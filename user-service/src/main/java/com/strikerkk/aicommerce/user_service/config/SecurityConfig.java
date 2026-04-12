@@ -5,7 +5,6 @@ import com.strikerkk.aicommerce.user_service.security.handler.CustomAuthenticati
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -27,11 +26,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/auth/signup").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(customAuthenticationEntryPoint)

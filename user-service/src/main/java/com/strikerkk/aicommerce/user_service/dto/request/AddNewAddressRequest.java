@@ -26,5 +26,5 @@ public class AddNewAddressRequest {
     private String pinCode;
 
 
-    private String isDefault;
+    private Boolean isDefault;
 }
