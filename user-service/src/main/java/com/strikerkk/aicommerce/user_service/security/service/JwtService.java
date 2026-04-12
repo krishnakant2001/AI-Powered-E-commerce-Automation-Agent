@@ -31,16 +31,4 @@ public class JwtService {
                 .signWith(getSecretKey())
                 .compact();
     }
-
-
-    public Long getUserIdFromToken(String authToken) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSecretKey())
-                .build()
-                .parseSignedClaims(authToken)
-                .getPayload();
-
-        return Long.valueOf(claims.getSubject());
-    }
-
 }
