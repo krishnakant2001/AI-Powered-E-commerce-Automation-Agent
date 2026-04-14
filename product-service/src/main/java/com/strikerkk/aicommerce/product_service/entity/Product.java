@@ -1,7 +1,10 @@
 package com.strikerkk.aicommerce.product_service.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -9,6 +12,9 @@ import java.util.List;
 
 @Entity
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "products")
 public class Product {
 
@@ -32,10 +38,13 @@ public class Product {
     private String category;
 
     @Column(name = "stock_count", nullable = false)
-    private String stockCount;
+    private Integer stockCount;
 
     @Column(name = "is_available", nullable = false)
-    private String isAvailable;
+    private Boolean isAvailable;
+
+    @Column(name = "created_by", nullable = false)
+    private String createdBy;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

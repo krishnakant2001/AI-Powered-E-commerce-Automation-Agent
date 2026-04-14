@@ -4,13 +4,13 @@ import com.strikerkk.aicommerce.user_service.dto.request.AddressRequest;
 import com.strikerkk.aicommerce.user_service.dto.response.AddressResponse;
 import com.strikerkk.aicommerce.user_service.entity.Address;
 import com.strikerkk.aicommerce.user_service.entity.User;
+import com.strikerkk.aicommerce.user_service.exception.ResourceNotFoundException;
 import com.strikerkk.aicommerce.user_service.repository.AddressRepository;
 import com.strikerkk.aicommerce.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,9 +26,9 @@ public class AddressService {
     public AddressResponse addAddress(AddressRequest request, String userId) {
 
         User user = userRepository.findById(Long.valueOf(userId))
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        //Adding new address
+        // Adding new address
         Address newAddress = Address.builder()
                 .user(user)
                 .houseNo(request.getHouseNo())
@@ -60,7 +60,7 @@ public class AddressService {
     public AddressResponse updateAddress(AddressRequest request, Long addressId, String userId) {
 
         Address address = addressRepository.findByIdAndUserId(addressId, Long.valueOf(userId))
-                .orElseThrow(() -> new RuntimeException("Address not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
 
         address.setHouseNo(request.getHouseNo());
         address.setStreet(request.getStreet());
@@ -78,16 +78,16 @@ public class AddressService {
             address.setIsDefault(false);
         }
 
-        Address saved = addressRepository.save(address);
+        Address updatedAddress = addressRepository.save(address);
 
-        return modelMapper.map(saved, AddressResponse.class);
+        return modelMapper.map(updatedAddress, AddressResponse.class);
     }
 
 
     public void deleteAddress(Long addressId, String userId) {
 
         Address address = addressRepository.findByIdAndUserId(addressId, Long.valueOf(userId))
-                .orElseThrow(() -> new RuntimeException("Address not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
 
         addressRepository.delete(address);
     }

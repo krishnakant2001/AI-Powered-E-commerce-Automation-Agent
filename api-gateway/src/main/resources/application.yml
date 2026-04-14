@@ -17,6 +17,15 @@ spring:
             - StripPrefix=2
             - AuthenticationFilter
 
+        - id: product-service
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/api/v1/products/**, /api/v1/admin/products/**
+          filters:
+            - StripPrefix=2
+            - AuthenticationFilter
+#            - RewritePath=/api/v1/(?<segment>.*), /${segment}
+
 #eureka-configuration
 eureka:
   client:
