@@ -28,8 +28,8 @@ public class ProductAdminController {
     // Products API
 
     @PostMapping("/create")
-    ResponseEntity<ApiResponse<ProductResponse>> createProduct(
-            @Valid @RequestBody ProductRequest request, @RequestHeader("X-user-id") String userId) {
+    ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody ProductRequest request,
+                                                               @RequestHeader("X-user-id") String userId) {
 
         ProductResponse productResponse = productService.createProduct(request, userId);
 
@@ -39,9 +39,9 @@ public class ProductAdminController {
     }
 
     @PutMapping("/update/{productId}")
-    ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
-            @Valid @RequestBody ProductRequest request, @PathVariable Long productId,
-            @RequestHeader("X-user-id") String userId) {
+    ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@Valid @RequestBody ProductRequest request,
+                                                               @PathVariable Long productId,
+                                                               @RequestHeader("X-user-id") String userId) {
 
         ProductResponse updatedProductResponse = productService.updateProduct(request, productId, userId);
 
@@ -51,8 +51,8 @@ public class ProductAdminController {
     }
 
     @DeleteMapping("/delete/{productId}")
-    ResponseEntity<ApiResponse<Void>> deleteProduct(
-            @PathVariable Long productId, @RequestHeader("X-user-id") String userId) {
+    ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long productId,
+                                                    @RequestHeader("X-user-id") String userId) {
 
         productService.deleteProduct(productId, userId);
 
@@ -64,22 +64,22 @@ public class ProductAdminController {
 
     // Product variant API
 
-    @PostMapping("/{productId}/variants")
-    ResponseEntity<ApiResponse<ProductVariantResponse>> createProductVariant(
-            @Valid @RequestBody ProductVariantRequest request, @PathVariable Long productId,
-            @RequestHeader("X-user-id") String userId) {
+    @PostMapping("/{productId}/add/variants")
+    ResponseEntity<ApiResponse<ProductVariantResponse>> createProductVariant(@Valid @RequestBody ProductVariantRequest request,
+                                                                             @PathVariable Long productId) {
 
-        ProductVariantResponse productVariantResponse = productVariantService.createProductVariant(request, productId, userId);
+        ProductVariantResponse productVariantResponse = productVariantService.createProductVariant(request, productId);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Product variant created successfully", productVariantResponse));
     }
 
-    @PutMapping("/update/{productId}/variants/{variantId}")
-    ResponseEntity<ApiResponse<ProductVariantResponse>> updateProductVariant(
-            @Valid @RequestBody ProductVariantRequest request, @PathVariable Long productId,
-            @PathVariable Long variantId, @RequestHeader("X-user-id") String userId) {
+    @PutMapping("/{productId}/update/variants/{variantId}")
+    ResponseEntity<ApiResponse<ProductVariantResponse>> updateProductVariant(@Valid @RequestBody ProductVariantRequest request,
+                                                                             @PathVariable Long productId,
+                                                                             @PathVariable Long variantId,
+                                                                             @RequestHeader("X-user-id") String userId) {
 
         ProductVariantResponse productVariantResponse = productVariantService.updateProductVariant(request, productId, variantId, userId);
 
@@ -88,10 +88,10 @@ public class ProductAdminController {
                 .body(ApiResponse.success("Product variant updated successfully", productVariantResponse));
     }
 
-    @DeleteMapping("/delete/{productId}/variants/{variantId}")
-    ResponseEntity<ApiResponse<Void>> deleteProductVariant(
-            @PathVariable Long productId, @PathVariable Long variantId,
-            @RequestHeader("X-user-id") String userId) {
+    @DeleteMapping("/{productId}/delete/variants/{variantId}")
+    ResponseEntity<ApiResponse<Void>> deleteProductVariant(@PathVariable Long productId,
+                                                           @PathVariable Long variantId,
+                                                           @RequestHeader("X-user-id") String userId) {
 
         productVariantService.deleteProductVariant(productId, variantId, userId);
 
@@ -103,22 +103,22 @@ public class ProductAdminController {
 
     // Product image API
 
-    @PostMapping("/{productId}/images")
-    ResponseEntity<ApiResponse<ProductImageResponse>> createProductImage(
-            @Valid @RequestBody ProductImageRequest request, @PathVariable Long productId,
-            @RequestHeader("X-user-id") String userId) {
+    @PostMapping("/{productId}/add/images")
+    ResponseEntity<ApiResponse<ProductImageResponse>> createProductImage(@Valid @RequestBody ProductImageRequest request,
+                                                                         @PathVariable Long productId) {
 
-        ProductImageResponse productImageResponse = productImageService.addProductImage(request, productId, userId);
+        ProductImageResponse productImageResponse = productImageService.addProductImage(request, productId);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Product image created successfully", productImageResponse));
     }
 
-    @PutMapping("/update/{productId}/images/{imageId}/primaryImage")
-    ResponseEntity<ApiResponse<ProductImageResponse>> updateProductImage(
-            @Valid @RequestBody ProductImageRequest request, @PathVariable Long productId,
-            @PathVariable Long imageId, @RequestHeader("X-user-id") String userId) {
+    @PutMapping("/{productId}/update/images/{imageId}/primaryImage")
+    ResponseEntity<ApiResponse<ProductImageResponse>> updateProductImage(@Valid @RequestBody ProductImageRequest request,
+                                                                         @PathVariable Long productId,
+                                                                         @PathVariable Long imageId,
+                                                                         @RequestHeader("X-user-id") String userId) {
 
         ProductImageResponse productImageResponse = productImageService.updateProductImage(request, productId, imageId, userId);
 
@@ -127,10 +127,10 @@ public class ProductAdminController {
                 .body(ApiResponse.success("Product image updated successfully", productImageResponse));
     }
 
-    @DeleteMapping("/delete/{productId}/image/{imageId}")
-    ResponseEntity<ApiResponse<Void>> deleteProductImage(
-            @PathVariable Long productId, @PathVariable Long imageId,
-            @RequestHeader("X-user-id") String userId) {
+    @DeleteMapping("/{productId}/delete/images/{imageId}")
+    ResponseEntity<ApiResponse<Void>> deleteProductImage(@PathVariable Long productId,
+                                                         @PathVariable Long imageId,
+                                                         @RequestHeader("X-user-id") String userId) {
 
         productImageService.deleteProductImage(productId, imageId, userId);
 

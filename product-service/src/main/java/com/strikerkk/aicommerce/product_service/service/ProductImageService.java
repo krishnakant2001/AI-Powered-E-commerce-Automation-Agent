@@ -22,7 +22,7 @@ public class ProductImageService {
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
 
-    public ProductImageResponse addProductImage(ProductImageRequest request, Long productId, String userId) {
+    public ProductImageResponse addProductImage(ProductImageRequest request, Long productId) {
 
         // Check if product exists
         Product product = productRepository.findById(productId)
@@ -55,6 +55,9 @@ public class ProductImageService {
         ProductImage productImage = productImageRepository.findByIdAndProductId(imageId, productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Image not found for this product"));
 
+        if(Boolean.TRUE.equals(request.getIsPrimary())) {
+            productImageRepository.restPrimaryImages(productId);
+        }
         productImage.setIsPrimary(request.getIsPrimary());
 
         ProductImage updatedImage = productImageRepository.save(productImage);

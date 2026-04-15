@@ -23,7 +23,7 @@ public class ProductVariantService {
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
 
-    public ProductVariantResponse createProductVariant(ProductVariantRequest request, Long productId, String userId) {
+    public ProductVariantResponse createProductVariant(ProductVariantRequest request, Long productId) {
 
         // Check if product exists
         Product product = productRepository.findById(productId)

@@ -21,8 +21,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<ApiResponse<UserResponse>> userRegistration(
-            @Valid @RequestBody CreateUserRequest request) {
+    public ResponseEntity<ApiResponse<UserResponse>> userRegistration(@Valid @RequestBody CreateUserRequest request) {
 
         UserResponse userResponse = userService.registerUser(request);
 
@@ -32,8 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> userLogin(
-            @Valid @RequestBody LoginUserRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> userLogin(@Valid @RequestBody LoginUserRequest request) {
 
         AuthResponse authResponse = authService.loginUser(request);
 

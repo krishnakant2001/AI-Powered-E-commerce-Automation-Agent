@@ -12,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +41,24 @@ public class ProductService {
         Product savedProduct = productRepository.save(newProduct);
 
         return modelMapper.map(savedProduct, ProductResponse.class);
+
+    }
+
+    public List<ProductResponse> getAllProducts() {
+
+        List<Product> productList = productRepository.findAll();
+
+        return productList.stream()
+                .map(product -> modelMapper.map(product, ProductResponse.class))
+                .toList();
+    }
+
+    public ProductResponse getProductDetails(Long productId) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        return modelMapper.map(product, ProductResponse.class);
 
     }
 

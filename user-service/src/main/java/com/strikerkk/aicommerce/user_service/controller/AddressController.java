@@ -19,8 +19,8 @@ public class AddressController {
     private final AddressService addressService;
 
     @PostMapping("/address/add")
-    public ResponseEntity<ApiResponse<AddressResponse>> addAddress(
-            @Valid @RequestBody AddressRequest request, @RequestHeader("X-user-id") String userId) {
+    public ResponseEntity<ApiResponse<AddressResponse>> addAddress(@Valid @RequestBody AddressRequest request,
+                                                                   @RequestHeader("X-user-id") String userId) {
 
         AddressResponse addressResponse = addressService.addAddress(request, userId);
 
@@ -40,9 +40,9 @@ public class AddressController {
     }
 
     @PutMapping("/address/update/{addressId}")
-    public ResponseEntity<ApiResponse<AddressResponse>> updateAddress(
-            @Valid @RequestBody AddressRequest request, @PathVariable Long addressId,
-            @RequestHeader("X-user-id") String userId) {
+    public ResponseEntity<ApiResponse<AddressResponse>> updateAddress(@Valid @RequestBody AddressRequest request,
+                                                                      @PathVariable Long addressId,
+                                                                      @RequestHeader("X-user-id") String userId) {
 
         AddressResponse addressResponse = addressService.updateAddress(request, addressId, userId);
 
@@ -52,8 +52,8 @@ public class AddressController {
     }
 
     @DeleteMapping("/address/delete/{addressId}")
-    public ResponseEntity<ApiResponse<Void>> deleteAddress(
-            @PathVariable Long addressId, @RequestHeader("X-user-id") String userId) {
+    public ResponseEntity<ApiResponse<Void>> deleteAddress(@PathVariable Long addressId,
+                                                           @RequestHeader("X-user-id") String userId) {
 
         addressService.deleteAddress(addressId, userId);
 

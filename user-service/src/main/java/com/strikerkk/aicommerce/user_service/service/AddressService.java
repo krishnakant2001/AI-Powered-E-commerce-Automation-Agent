@@ -89,6 +89,18 @@ public class AddressService {
         Address address = addressRepository.findByIdAndUserId(addressId, Long.valueOf(userId))
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
 
+        // If the address is default
+        if (Boolean.TRUE.equals(address.getIsDefault())) {
+
+            // Find another address of the user
+            Address anotherAddress = addressRepository.findFirstByUserIdAndIdNot(Long.valueOf(userId), addressId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Please add another address"));
+
+            // If another address exists, make it default
+            anotherAddress.setIsDefault(true);
+            addressRepository.save(anotherAddress);
+        }
+
         addressRepository.delete(address);
     }
 }

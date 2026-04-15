@@ -17,6 +17,8 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
 
     List<Address> findAllByUserId(Long userId);
 
+    Optional<Address> findFirstByUserIdAndIdNot(Long userId, Long addressId);
+
     @Modifying
     @Transactional
     @Query("""
