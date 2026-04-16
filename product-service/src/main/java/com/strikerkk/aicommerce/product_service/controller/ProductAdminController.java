@@ -7,6 +7,7 @@ import com.strikerkk.aicommerce.product_service.dto.request.ProductVariantReques
 import com.strikerkk.aicommerce.product_service.dto.response.ProductImageResponse;
 import com.strikerkk.aicommerce.product_service.dto.response.ProductResponse;
 import com.strikerkk.aicommerce.product_service.dto.response.ProductVariantResponse;
+import com.strikerkk.aicommerce.product_service.exception.UnauthorizedException;
 import com.strikerkk.aicommerce.product_service.service.ProductImageService;
 import com.strikerkk.aicommerce.product_service.service.ProductService;
 import com.strikerkk.aicommerce.product_service.service.ProductVariantService;
@@ -29,7 +30,12 @@ public class ProductAdminController {
 
     @PostMapping("/create")
     ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody ProductRequest request,
-                                                               @RequestHeader("X-user-id") String userId) {
+                                                               @RequestHeader("X-user-id") String userId,
+                                                               @RequestHeader("X-user-role") String role) {
+
+        if(!role.equals("ADMIN")) {
+            throw new UnauthorizedException("Only admins can allowed to perform action");
+        }
 
         ProductResponse productResponse = productService.createProduct(request, userId);
 
@@ -41,7 +47,12 @@ public class ProductAdminController {
     @PutMapping("/update/{productId}")
     ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@Valid @RequestBody ProductRequest request,
                                                                @PathVariable Long productId,
-                                                               @RequestHeader("X-user-id") String userId) {
+                                                               @RequestHeader("X-user-id") String userId,
+                                                               @RequestHeader("X-user-role") String role) {
+
+        if(!role.equals("ADMIN")) {
+            throw new UnauthorizedException("Only admins can allowed to perform action");
+        }
 
         ProductResponse updatedProductResponse = productService.updateProduct(request, productId, userId);
 
@@ -52,7 +63,12 @@ public class ProductAdminController {
 
     @DeleteMapping("/delete/{productId}")
     ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long productId,
-                                                    @RequestHeader("X-user-id") String userId) {
+                                                    @RequestHeader("X-user-id") String userId,
+                                                    @RequestHeader("X-user-role") String role) {
+
+        if(!role.equals("ADMIN")) {
+            throw new UnauthorizedException("Only admins can allowed to perform action");
+        }
 
         productService.deleteProduct(productId, userId);
 
@@ -66,7 +82,12 @@ public class ProductAdminController {
 
     @PostMapping("/{productId}/add/variants")
     ResponseEntity<ApiResponse<ProductVariantResponse>> createProductVariant(@Valid @RequestBody ProductVariantRequest request,
-                                                                             @PathVariable Long productId) {
+                                                                             @PathVariable Long productId,
+                                                                             @RequestHeader("X-user-role") String role) {
+
+        if(!role.equals("ADMIN")) {
+            throw new UnauthorizedException("Only admins can allowed to perform action");
+        }
 
         ProductVariantResponse productVariantResponse = productVariantService.createProductVariant(request, productId);
 
@@ -79,7 +100,12 @@ public class ProductAdminController {
     ResponseEntity<ApiResponse<ProductVariantResponse>> updateProductVariant(@Valid @RequestBody ProductVariantRequest request,
                                                                              @PathVariable Long productId,
                                                                              @PathVariable Long variantId,
-                                                                             @RequestHeader("X-user-id") String userId) {
+                                                                             @RequestHeader("X-user-id") String userId,
+                                                                             @RequestHeader("X-user-role") String role) {
+
+        if(!role.equals("ADMIN")) {
+            throw new UnauthorizedException("Only admins can allowed to perform action");
+        }
 
         ProductVariantResponse productVariantResponse = productVariantService.updateProductVariant(request, productId, variantId, userId);
 
@@ -91,7 +117,12 @@ public class ProductAdminController {
     @DeleteMapping("/{productId}/delete/variants/{variantId}")
     ResponseEntity<ApiResponse<Void>> deleteProductVariant(@PathVariable Long productId,
                                                            @PathVariable Long variantId,
-                                                           @RequestHeader("X-user-id") String userId) {
+                                                           @RequestHeader("X-user-id") String userId,
+                                                           @RequestHeader("X-user-role") String role) {
+
+        if(!role.equals("ADMIN")) {
+            throw new UnauthorizedException("Only admins can allowed to perform action");
+        }
 
         productVariantService.deleteProductVariant(productId, variantId, userId);
 
@@ -105,7 +136,12 @@ public class ProductAdminController {
 
     @PostMapping("/{productId}/add/images")
     ResponseEntity<ApiResponse<ProductImageResponse>> createProductImage(@Valid @RequestBody ProductImageRequest request,
-                                                                         @PathVariable Long productId) {
+                                                                         @PathVariable Long productId,
+                                                                         @RequestHeader("X-user-role") String role) {
+
+        if(!role.equals("ADMIN")) {
+            throw new UnauthorizedException("Only admins can allowed to perform action");
+        }
 
         ProductImageResponse productImageResponse = productImageService.addProductImage(request, productId);
 
@@ -118,7 +154,12 @@ public class ProductAdminController {
     ResponseEntity<ApiResponse<ProductImageResponse>> updateProductImage(@Valid @RequestBody ProductImageRequest request,
                                                                          @PathVariable Long productId,
                                                                          @PathVariable Long imageId,
-                                                                         @RequestHeader("X-user-id") String userId) {
+                                                                         @RequestHeader("X-user-id") String userId,
+                                                                         @RequestHeader("X-user-role") String role) {
+
+        if(!role.equals("ADMIN")) {
+            throw new UnauthorizedException("Only admins can allowed to perform action");
+        }
 
         ProductImageResponse productImageResponse = productImageService.updateProductImage(request, productId, imageId, userId);
 
@@ -130,7 +171,12 @@ public class ProductAdminController {
     @DeleteMapping("/{productId}/delete/images/{imageId}")
     ResponseEntity<ApiResponse<Void>> deleteProductImage(@PathVariable Long productId,
                                                          @PathVariable Long imageId,
-                                                         @RequestHeader("X-user-id") String userId) {
+                                                         @RequestHeader("X-user-id") String userId,
+                                                         @RequestHeader("X-user-role") String role) {
+
+        if(!role.equals("ADMIN")) {
+            throw new UnauthorizedException("Only admins can allowed to perform action");
+        }
 
         productImageService.deleteProductImage(productId, imageId, userId);
 

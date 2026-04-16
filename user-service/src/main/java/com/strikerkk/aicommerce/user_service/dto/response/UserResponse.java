@@ -12,6 +12,7 @@ public class UserResponse {
     private String lastName;
     private String email;
     private String phoneNumber;
+    private String role;
     private List<AddressResponse> addresses;
     private LocalDateTime createdAt;
 }

@@ -1,5 +1,6 @@
 package com.strikerkk.aicommerce.user_service.entity;
 
+import com.strikerkk.aicommerce.user_service.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,6 +35,11 @@ public class User {
 
     @Column(name = "phone_number", length = 15)
     private String phoneNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 15)
+    @Builder.Default
+    private Role role = Role.USER;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

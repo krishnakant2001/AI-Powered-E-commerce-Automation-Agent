@@ -1,5 +1,6 @@
 package com.strikerkk.aicommerce.api_gateway.service;
 
+import com.strikerkk.aicommerce.api_gateway.dto.TokenClaims;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -19,13 +20,27 @@ public class JwtService {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String getUserIdFromToken(String authToken) {
+    public TokenClaims getClaimsFromToken(String authToken) {
         Claims claims = Jwts.parser()
                 .verifyWith(getSecretKey())
                 .build()
                 .parseSignedClaims(authToken)
                 .getPayload();
 
-        return claims.getSubject();
+        return new TokenClaims(
+                claims.getSubject(),
+                claims.get("role", String.class)
+        );
     }
+
+//    public String getRoleFromToken(String authToken) {
+//        Claims claims = Jwts.parser()
+//                .verifyWith(getSecretKey())
+//                .build()
+//                .parseSignedClaims(authToken)
+//                .getPayload();
+//
+//        return claims.get("role", String.class);
+//    }
+
 }

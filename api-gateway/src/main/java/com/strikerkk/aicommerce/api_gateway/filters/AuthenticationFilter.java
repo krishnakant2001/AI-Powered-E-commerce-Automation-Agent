@@ -1,5 +1,6 @@
 package com.strikerkk.aicommerce.api_gateway.filters;
 
+import com.strikerkk.aicommerce.api_gateway.dto.TokenClaims;
 import com.strikerkk.aicommerce.api_gateway.service.JwtService;
 import jakarta.ws.rs.core.HttpHeaders;
 import lombok.extern.slf4j.Slf4j;
@@ -56,11 +57,13 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             final String authToken = authHeader.split("Bearer ")[1];
 
             try {
-                String userId = jwtService.getUserIdFromToken(authToken);
+                TokenClaims tokenClaims = jwtService.getClaimsFromToken(authToken);
 
                 ServerWebExchange modifiedExchange = exchange
                         .mutate()
-                        .request(req -> req.header("X-user-id", userId))
+                        .request(req -> req
+                                .header("X-user-id", tokenClaims.getUserId())
+                                .header("X-user-role", tokenClaims.getRole()))
                         .build();
 
                 return chain.filter(modifiedExchange);
