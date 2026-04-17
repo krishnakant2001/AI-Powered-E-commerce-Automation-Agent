@@ -81,4 +81,13 @@ public class UserService implements UserDetailsService {
                 .map(user -> modelMapper.map(user, UserResponse.class))
                 .toList();
     }
+
+    public void deleteUser(String userId) {
+
+        if(!userRepository.existsById(Long.valueOf(userId))) {
+            throw new ResourceNotFoundException("User not found with userId " + userId);
+        }
+
+        userRepository.deleteById(Long.valueOf(userId));
+    }
 }

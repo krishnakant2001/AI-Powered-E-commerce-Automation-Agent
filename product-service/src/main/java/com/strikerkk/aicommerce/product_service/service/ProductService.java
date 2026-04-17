@@ -1,5 +1,6 @@
 package com.strikerkk.aicommerce.product_service.service;
 
+import com.strikerkk.aicommerce.product_service.auth.UserContext;
 import com.strikerkk.aicommerce.product_service.dto.request.ProductRequest;
 import com.strikerkk.aicommerce.product_service.dto.response.ProductResponse;
 import com.strikerkk.aicommerce.product_service.entity.Product;
@@ -23,7 +24,9 @@ public class ProductService {
     private final ModelMapper modelMapper;
 
 
-    public ProductResponse createProduct(ProductRequest request, String userId) {
+    public ProductResponse createProduct(ProductRequest request) {
+
+        String userId = UserContext.getUserId();
 
         Product newProduct = Product.builder()
                 .name(request.getName())
@@ -62,7 +65,9 @@ public class ProductService {
 
     }
 
-    public ProductResponse updateProduct(ProductRequest request, Long productId, String userId) {
+    public ProductResponse updateProduct(ProductRequest request, Long productId) {
+
+        String userId = UserContext.getUserId();
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product is not found"));
@@ -86,7 +91,9 @@ public class ProductService {
 
     }
 
-    public void deleteProduct(Long productId, String userId) {
+    public void deleteProduct(Long productId) {
+
+        String userId = UserContext.getUserId();
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product is not found"));

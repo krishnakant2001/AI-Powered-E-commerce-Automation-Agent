@@ -64,4 +64,15 @@ public class AuthController {
                 .body(ApiResponse.success("Successfully fetch all user details",userResponseList));
 
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("admin/delete/user/{userId}")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String userId) {
+
+        userService.deleteUser(userId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Successfully delete the user with id " + userId));
+    }
 }

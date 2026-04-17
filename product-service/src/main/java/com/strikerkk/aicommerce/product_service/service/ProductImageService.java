@@ -1,5 +1,6 @@
 package com.strikerkk.aicommerce.product_service.service;
 
+import com.strikerkk.aicommerce.product_service.auth.UserContext;
 import com.strikerkk.aicommerce.product_service.dto.request.ProductImageRequest;
 import com.strikerkk.aicommerce.product_service.dto.response.ProductImageResponse;
 import com.strikerkk.aicommerce.product_service.entity.Product;
@@ -40,7 +41,9 @@ public class ProductImageService {
         return modelMapper.map(savedProductImage, ProductImageResponse.class);
     }
 
-    public ProductImageResponse updateProductImage(ProductImageRequest request, Long productId, Long imageId, String userId) {
+    public ProductImageResponse updateProductImage(ProductImageRequest request, Long productId, Long imageId) {
+
+        String userId = UserContext.getUserId();
 
         // Check if product exists
         Product product = productRepository.findById(productId)
@@ -65,7 +68,9 @@ public class ProductImageService {
         return modelMapper.map(updatedImage, ProductImageResponse.class);
     }
 
-    public void deleteProductImage(Long productId, Long imageId, String userId) {
+    public void deleteProductImage(Long productId, Long imageId) {
+
+        String userId = UserContext.getUserId();
 
         // Check if product exists
         Product product = productRepository.findById(productId)

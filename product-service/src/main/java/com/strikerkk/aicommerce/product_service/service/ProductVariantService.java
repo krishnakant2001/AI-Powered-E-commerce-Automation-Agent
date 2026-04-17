@@ -1,5 +1,6 @@
 package com.strikerkk.aicommerce.product_service.service;
 
+import com.strikerkk.aicommerce.product_service.auth.UserContext;
 import com.strikerkk.aicommerce.product_service.dto.request.ProductVariantRequest;
 import com.strikerkk.aicommerce.product_service.dto.response.ProductVariantResponse;
 import com.strikerkk.aicommerce.product_service.entity.Product;
@@ -44,7 +45,9 @@ public class ProductVariantService {
 
     }
 
-    public ProductVariantResponse updateProductVariant(ProductVariantRequest request, Long productId, Long variantId, String userId) {
+    public ProductVariantResponse updateProductVariant(ProductVariantRequest request, Long productId, Long variantId) {
+
+        String userId = UserContext.getUserId();
 
         // Check if product exists
         Product product = productRepository.findById(productId)
@@ -70,7 +73,9 @@ public class ProductVariantService {
         return modelMapper.map(updatedVariant, ProductVariantResponse.class);
     }
 
-    public void deleteProductVariant(Long productId, Long variantId, String userId) {
+    public void deleteProductVariant(Long productId, Long variantId) {
+
+        String userId = UserContext.getUserId();
 
         // Check if product exists
         Product product = productRepository.findById(productId)
