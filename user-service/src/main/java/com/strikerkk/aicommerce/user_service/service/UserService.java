@@ -74,12 +74,6 @@ public class UserService implements UserDetailsService {
 
     public List<UserResponse> allUserDetails() {
 
-        String userRole = UserContext.getUserRole();
-
-        if(!userRole.equals("ADMIN")) {
-            throw new UnauthorizedException("Only admins can allowed to perform action");
-        }
-
         List<User> userList = userRepository.findAll();
 
         return userList
