@@ -1,8 +1,11 @@
 package com.strikerkk.aicommerce.user_service.service;
 
+import com.strikerkk.aicommerce.user_service.auth.UserContext;
 import com.strikerkk.aicommerce.user_service.dto.request.CreateUserRequest;
 import com.strikerkk.aicommerce.user_service.dto.response.UserResponse;
 import com.strikerkk.aicommerce.user_service.exception.BadRequestException;
+import com.strikerkk.aicommerce.user_service.exception.ResourceNotFoundException;
+import com.strikerkk.aicommerce.user_service.exception.UnauthorizedException;
 import com.strikerkk.aicommerce.user_service.security.model.CustomUserDetails;
 import com.strikerkk.aicommerce.user_service.entity.User;
 import com.strikerkk.aicommerce.user_service.repository.UserRepository;
@@ -16,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -58,11 +62,29 @@ public class UserService implements UserDetailsService {
         return modelMapper.map(savedUser, UserResponse.class);
     }
 
-    public UserResponse userDetails(String userId) {
+    public UserResponse userDetails() {
+
+        String userId = UserContext.getUserId();
 
         User user = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return modelMapper.map(user, UserResponse.class);
+    }
+
+    public List<UserResponse> allUserDetails() {
+
+        String userRole = UserContext.getUserRole();
+
+        if(!userRole.equals("ADMIN")) {
+            throw new UnauthorizedException("Only admins can allowed to perform action");
+        }
+
+        List<User> userList = userRepository.findAll();
+
+        return userList
+                .stream()
+                .map(user -> modelMapper.map(user, UserResponse.class))
+                .toList();
     }
 }

@@ -1,5 +1,6 @@
 package com.strikerkk.aicommerce.user_service.service;
 
+import com.strikerkk.aicommerce.user_service.auth.UserContext;
 import com.strikerkk.aicommerce.user_service.dto.request.AddressRequest;
 import com.strikerkk.aicommerce.user_service.dto.response.AddressResponse;
 import com.strikerkk.aicommerce.user_service.entity.Address;
@@ -23,7 +24,9 @@ public class AddressService {
     private final AddressRepository addressRepository;
     private final ModelMapper modelMapper;
 
-    public AddressResponse addAddress(AddressRequest request, String userId) {
+    public AddressResponse addAddress(AddressRequest request) {
+
+        String userId = UserContext.getUserId();
 
         User user = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -46,7 +49,9 @@ public class AddressService {
     }
 
 
-    public List<AddressResponse> allAddresses(String userId) {
+    public List<AddressResponse> allAddresses() {
+
+        String userId = UserContext.getUserId();
 
         List<Address> addressList = addressRepository.findAllByUserId(Long.valueOf(userId));
 
@@ -57,7 +62,9 @@ public class AddressService {
     }
 
 
-    public AddressResponse updateAddress(AddressRequest request, Long addressId, String userId) {
+    public AddressResponse updateAddress(AddressRequest request, Long addressId) {
+
+        String userId = UserContext.getUserId();
 
         Address address = addressRepository.findByIdAndUserId(addressId, Long.valueOf(userId))
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
@@ -84,7 +91,9 @@ public class AddressService {
     }
 
 
-    public void deleteAddress(Long addressId, String userId) {
+    public void deleteAddress(Long addressId) {
+
+        String userId = UserContext.getUserId();
 
         Address address = addressRepository.findByIdAndUserId(addressId, Long.valueOf(userId))
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found"));

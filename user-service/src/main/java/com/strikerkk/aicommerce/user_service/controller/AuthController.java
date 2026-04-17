@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
@@ -41,12 +43,23 @@ public class AuthController {
     }
 
     @GetMapping("/details")
-    public ResponseEntity<ApiResponse<UserResponse>> userDetails(@RequestHeader("X-user-id") String userId) {
+    public ResponseEntity<ApiResponse<UserResponse>> userDetails() {
 
-        UserResponse userResponse = userService.userDetails(userId);
+        UserResponse userResponse = userService.userDetails();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Successfully fetch user details", userResponse));
+    }
+
+    @GetMapping("admin/all/user/details")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> allUserDetails() {
+
+        List<UserResponse> userResponseList = userService.allUserDetails();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Successfully fetch all user details",userResponseList));
+
     }
 }

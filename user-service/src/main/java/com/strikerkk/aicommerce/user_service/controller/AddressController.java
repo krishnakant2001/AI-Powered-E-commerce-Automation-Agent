@@ -19,10 +19,9 @@ public class AddressController {
     private final AddressService addressService;
 
     @PostMapping("/address/add")
-    public ResponseEntity<ApiResponse<AddressResponse>> addAddress(@Valid @RequestBody AddressRequest request,
-                                                                   @RequestHeader("X-user-id") String userId) {
+    public ResponseEntity<ApiResponse<AddressResponse>> addAddress(@Valid @RequestBody AddressRequest request) {
 
-        AddressResponse addressResponse = addressService.addAddress(request, userId);
+        AddressResponse addressResponse = addressService.addAddress(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -30,9 +29,9 @@ public class AddressController {
     }
 
     @GetMapping("/address/all")
-    public ResponseEntity<ApiResponse<List<AddressResponse>>> allAddresses(@RequestHeader("X-user-id") String userId) {
+    public ResponseEntity<ApiResponse<List<AddressResponse>>> allAddresses() {
 
-        List<AddressResponse> addressResponseList = addressService.allAddresses(userId);
+        List<AddressResponse> addressResponseList = addressService.allAddresses();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -41,10 +40,9 @@ public class AddressController {
 
     @PutMapping("/address/update/{addressId}")
     public ResponseEntity<ApiResponse<AddressResponse>> updateAddress(@Valid @RequestBody AddressRequest request,
-                                                                      @PathVariable Long addressId,
-                                                                      @RequestHeader("X-user-id") String userId) {
+                                                                      @PathVariable Long addressId) {
 
-        AddressResponse addressResponse = addressService.updateAddress(request, addressId, userId);
+        AddressResponse addressResponse = addressService.updateAddress(request, addressId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -52,10 +50,9 @@ public class AddressController {
     }
 
     @DeleteMapping("/address/delete/{addressId}")
-    public ResponseEntity<ApiResponse<Void>> deleteAddress(@PathVariable Long addressId,
-                                                           @RequestHeader("X-user-id") String userId) {
+    public ResponseEntity<ApiResponse<Void>> deleteAddress(@PathVariable Long addressId) {
 
-        addressService.deleteAddress(addressId, userId);
+        addressService.deleteAddress(addressId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
