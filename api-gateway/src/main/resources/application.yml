@@ -26,6 +26,14 @@ spring:
             - AuthenticationFilter
 #            - RewritePath=/api/v1/(?<segment>.*), /${segment}
 
+        - id: cart-service
+          uri: lb://CART-SERVICE
+          predicates:
+            - Path=/api/v1/cart/**
+          filters:
+            - StripPrefix=2
+            - AuthenticationFilter
+
 #eureka-configuration
 eureka:
   client:
