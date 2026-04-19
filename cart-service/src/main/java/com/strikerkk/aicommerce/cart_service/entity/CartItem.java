@@ -38,6 +38,19 @@ public class CartItem {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
+    // Snapshots Fields
+    @Column(name = "product_name", nullable = false)
+    private String productName;
+
     @Column(name = "price_at_add", nullable = false, precision = 10, scale = 2)
     private BigDecimal priceAtAdd;
+
+    @Column(name = "product_image_url", nullable = false)
+    private String imageUrl;
+
+    @Column(name = "size", nullable = false)
+    private String size;
+
+    @Column(name = "color", nullable = false)
+    private String color;
 }

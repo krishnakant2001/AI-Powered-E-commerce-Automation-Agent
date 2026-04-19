@@ -1,7 +1,9 @@
 package com.strikerkk.aicommerce.product_service.controller;
 
 import com.strikerkk.aicommerce.product_service.common.ApiResponse;
+import com.strikerkk.aicommerce.product_service.dto.response.ProductCartResponse;
 import com.strikerkk.aicommerce.product_service.dto.response.ProductResponse;
+import com.strikerkk.aicommerce.product_service.service.ProductCartService;
 import com.strikerkk.aicommerce.product_service.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductCartService productCartService;
 
     @GetMapping("/all")
     ResponseEntity<ApiResponse<List<ProductResponse>>> allProducts() {
@@ -34,5 +37,11 @@ public class ProductController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success("Successfully the products details", productResponse));
+    }
+
+
+    @GetMapping("/{productId}/variants/{variantId}/cart-info")
+    ProductCartResponse getProductCartInfo(@PathVariable Long productId, @PathVariable Long variantId) {
+        return productCartService.getProductCartDetails(productId, variantId);
     }
 }
