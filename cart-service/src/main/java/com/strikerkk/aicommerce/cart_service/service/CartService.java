@@ -93,7 +93,12 @@ public class CartService {
         cartItem.setQuantity(request.getQuantity());
         cartItemRepository.save(cartItem);
 
-        return modelMapper.map(cartItem, CartItemResponse.class);
+        CartItemResponse cartItemResponse = modelMapper.map(cartItem, CartItemResponse.class);
+        cartItemResponse.setItemTotal(cartItem.getPriceAtAdd().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+
+        cartItemResponse.setProductDetails(mapToProductDetails(cartItem));
+
+        return cartItemResponse;
     }
 
 
