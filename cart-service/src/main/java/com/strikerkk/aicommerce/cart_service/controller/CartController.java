@@ -19,7 +19,7 @@ public class CartController {
 
     private final CartService cartService;
 
-    @GetMapping("/")
+    @GetMapping("")
     ResponseEntity<ApiResponse<CartResponse>> allCartItems() {
 
         CartResponse cartResponse = cartService.allCartItems();
@@ -53,8 +53,10 @@ public class CartController {
     @DeleteMapping("/items/{cartItemId}")
     ResponseEntity<ApiResponse<Void>> deleteItemFromCart(@PathVariable Long cartItemId) {
 
+        cartService.deleteItemFromCart(cartItemId);
+
         return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
+                .status(HttpStatus.OK)
                 .body(ApiResponse.success("Successfully deleted the item from cart"));
     }
 
@@ -62,8 +64,10 @@ public class CartController {
     @DeleteMapping("/clear")
     ResponseEntity<ApiResponse<Void>> clearAllItemsFromCart() {
 
+        cartService.clearCart();
+
         return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
+                .status(HttpStatus.OK)
                 .body(ApiResponse.success("Successfully clear the cart"));
     }
 }

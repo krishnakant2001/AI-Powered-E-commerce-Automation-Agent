@@ -1,9 +1,8 @@
 package com.strikerkk.aicommerce.cart_service.exception.advice;
 
 import com.strikerkk.aicommerce.cart_service.common.ApiResponse;
-import com.strikerkk.aicommerce.cart_service.exception.BadRequestException;
-import com.strikerkk.aicommerce.cart_service.exception.ResourceNotFoundException;
-import com.strikerkk.aicommerce.cart_service.exception.UnauthorizedException;
+import com.strikerkk.aicommerce.cart_service.exception.*;
+import com.strikerkk.aicommerce.cart_service.exception.IllegalStateException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,8 +29,22 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(errorMessage));
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(BadRequestException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ex.getMessage()));

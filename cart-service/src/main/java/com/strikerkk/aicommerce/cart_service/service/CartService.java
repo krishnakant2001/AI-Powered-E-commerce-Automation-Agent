@@ -10,6 +10,7 @@ import com.strikerkk.aicommerce.cart_service.dto.response.ProductCartResponse;
 import com.strikerkk.aicommerce.cart_service.dto.response.ProductDetails;
 import com.strikerkk.aicommerce.cart_service.entity.Cart;
 import com.strikerkk.aicommerce.cart_service.entity.CartItem;
+import com.strikerkk.aicommerce.cart_service.exception.AccessDeniedException;
 import com.strikerkk.aicommerce.cart_service.exception.IllegalStateException;
 import com.strikerkk.aicommerce.cart_service.exception.ResourceNotFoundException;
 import com.strikerkk.aicommerce.cart_service.repository.CartItemRepository;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -99,6 +101,32 @@ public class CartService {
         cartItemResponse.setProductDetails(mapToProductDetails(cartItem));
 
         return cartItemResponse;
+    }
+
+    @Transactional
+    public void deleteItemFromCart(Long cartItemId) {
+
+        Long userId = Long.valueOf(UserContext.getUserId());
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Cart item not found " + cartItemId));
+
+        if(!cartItem.getCart().getUserId().equals(userId)) {
+            throw new AccessDeniedException("Unauthorized request");
+        }
+
+        cartItemRepository.delete(cartItem);
+    }
+
+    @Transactional
+    public void clearCart() {
+        Long userId = Long.valueOf(UserContext.getUserId());
+
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("No cart found for userId "+ userId));
+
+        // Delete cart items instead of whole cart
+        cartItemRepository.deleteAllByCartId(cart.getId());
     }
 
 
