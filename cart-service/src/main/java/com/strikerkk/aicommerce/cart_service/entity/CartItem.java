@@ -42,11 +42,14 @@ public class CartItem {
     @Column(name = "product_name", nullable = false)
     private String productName;
 
+    @Column(name = "product_brand", nullable = false)
+    private String productBrand;
+
     @Column(name = "price_at_add", nullable = false, precision = 10, scale = 2)
     private BigDecimal priceAtAdd;
 
     @Column(name = "product_image_url", nullable = false)
-    private String imageUrl;
+    private String ProductImageUrl;
 
     @Column(name = "size", nullable = false)
     private String size;

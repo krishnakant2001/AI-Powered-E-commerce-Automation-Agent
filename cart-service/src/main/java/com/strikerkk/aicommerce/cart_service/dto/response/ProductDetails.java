@@ -6,8 +6,8 @@ import lombok.Data;
 public class ProductDetails {
 
     private String productName;
-    private String productImageUrl;
     private String productBrand;
+    private String productImageUrl;
 
     private String variantName;
     private String variantSku;
