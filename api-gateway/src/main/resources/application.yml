@@ -34,6 +34,14 @@ spring:
             - StripPrefix=2
             - AuthenticationFilter
 
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/api/v1/orders/**
+          filters:
+            - StripPrefix=2
+            - AuthenticationFilter
+
 #eureka-configuration
 eureka:
   client:

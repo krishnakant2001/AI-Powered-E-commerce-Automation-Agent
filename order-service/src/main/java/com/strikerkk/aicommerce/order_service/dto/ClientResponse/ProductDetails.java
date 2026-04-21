@@ -1,10 +1,9 @@
-package com.strikerkk.aicommerce.cart_service.dto.response;
+package com.strikerkk.aicommerce.order_service.dto.ClientResponse;
 
 import lombok.Data;
 
 @Data
 public class ProductDetails {
-
     private String productName;
     private String productBrand;
     private String productImageUrl;

@@ -38,6 +38,11 @@ public class AddressController {
                 .body(ApiResponse.success("Successfully fetch all addresses", addressResponseList));
     }
 
+    @GetMapping("/address/{addressId}")
+    public AddressResponse getAddressByAddressId(@PathVariable Long addressId) {
+        return addressService.getAddressByAddressId(addressId);
+    }
+
     @PutMapping("/address/update/{addressId}")
     public ResponseEntity<ApiResponse<AddressResponse>> updateAddress(@Valid @RequestBody AddressRequest request,
                                                                       @PathVariable Long addressId) {

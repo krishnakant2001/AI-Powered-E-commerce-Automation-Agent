@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/cart")
 @RequiredArgsConstructor
@@ -27,6 +29,12 @@ public class CartController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Successfully fetch all items of user cart", cartResponse));
+    }
+
+    @GetMapping("/items")
+    List<CartItemResponse> getCartItems() {
+        CartResponse cartResponse = cartService.allCartItems();
+        return cartResponse.getItems();
     }
 
     @PostMapping("/items")
@@ -62,7 +70,7 @@ public class CartController {
 
 
     @DeleteMapping("/clear")
-    ResponseEntity<ApiResponse<Void>> clearAllItemsFromCart() {
+    ResponseEntity<ApiResponse<Void>> clearCart() {
 
         cartService.clearCart();
 

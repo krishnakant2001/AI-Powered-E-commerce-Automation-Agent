@@ -48,6 +48,15 @@ public class AddressService {
         return modelMapper.map(savedNewAddress, AddressResponse.class);
     }
 
+    public AddressResponse getAddressByAddressId(Long addressId) {
+        Long userId = Long.valueOf(UserContext.getUserId());
+
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address not present"));
+
+        return modelMapper.map(address, AddressResponse.class);
+
+    }
 
     public List<AddressResponse> allAddresses() {
 
