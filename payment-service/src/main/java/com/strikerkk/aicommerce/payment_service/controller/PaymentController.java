@@ -4,12 +4,15 @@ import com.strikerkk.aicommerce.payment_service.common.ApiResponse;
 import com.strikerkk.aicommerce.payment_service.dto.request.InitiatePaymentRequest;
 import com.strikerkk.aicommerce.payment_service.dto.request.VerifyPaymentRequest;
 import com.strikerkk.aicommerce.payment_service.dto.response.InitiatePaymentResponse;
+import com.strikerkk.aicommerce.payment_service.dto.response.RefundResponse;
 import com.strikerkk.aicommerce.payment_service.dto.response.VerifyPaymentResponse;
 import com.strikerkk.aicommerce.payment_service.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/payments")
@@ -37,5 +40,14 @@ public class PaymentController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Payment verified", response));
+    }
+
+    @GetMapping("/{paymentId}/refunds")
+    public ResponseEntity<ApiResponse<List<RefundResponse>>> getRefunds(@PathVariable Long paymentId) {
+        List<RefundResponse> refundResponseList = paymentService.getRefundsByPaymentId(paymentId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Getting refund list", refundResponseList));
     }
 }

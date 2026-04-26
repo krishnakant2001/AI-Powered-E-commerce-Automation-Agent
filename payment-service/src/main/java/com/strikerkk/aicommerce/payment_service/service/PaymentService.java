@@ -3,6 +3,8 @@ package com.strikerkk.aicommerce.payment_service.service;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import com.strikerkk.aicommerce.payment_service.dto.response.RefundResponse;
+import com.strikerkk.aicommerce.payment_service.entity.Refund;
 import com.strikerkk.aicommerce.payment_service.payment.VerifySignature;
 import com.strikerkk.aicommerce.payment_service.auth.UserContext;
 import com.strikerkk.aicommerce.payment_service.clients.OrderClient;
@@ -17,6 +19,7 @@ import com.strikerkk.aicommerce.payment_service.entity.enums.PaymentGateway;
 import com.strikerkk.aicommerce.payment_service.entity.enums.PaymentStatus;
 import com.strikerkk.aicommerce.payment_service.exception.UnauthorizedException;
 import com.strikerkk.aicommerce.payment_service.repository.PaymentRepository;
+import com.strikerkk.aicommerce.payment_service.repository.RefundRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -27,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +38,7 @@ import java.time.LocalDateTime;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final RefundRepository refundRepository;
     private final OrderClient orderClient;
     private final RazorpayClient razorpayClient;
     private final VerifySignature verifySignature;
@@ -165,5 +170,22 @@ public class PaymentService {
 
             return response;
         }
+    }
+
+    public List<RefundResponse> getRefundsByPaymentId(Long paymentId) {
+        Long userId = Long.valueOf(UserContext.getUserId());
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        if(!payment.getUserId().equals(userId)) {
+            throw new RuntimeException("Payment does not belong to this user");
+        }
+
+        List<Refund> refundList = refundRepository.findAllByPaymentId(paymentId);
+
+        return refundList.stream()
+                .map(refund -> modelMapper.map(refund, RefundResponse.class))
+                .toList();
     }
 }
