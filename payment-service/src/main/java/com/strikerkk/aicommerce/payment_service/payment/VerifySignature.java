@@ -17,6 +17,9 @@ public class VerifySignature {
     @Value("${razorpay.key.secret}")
     private String razorpayKeySecret;
 
+    @Value("${razorpay.webhook.key.secret}")
+    private String webhookKeySecret;
+
     public boolean verifyRazorpaySignature(String razorpayOrderId, String razorpayPaymentId, String razorpaySignature) {
         try {
             // Razorpay signature verification formula:
@@ -50,5 +53,34 @@ public class VerifySignature {
             log.error("Error during signature verification", e);
             return false;
         }
+    }
+
+    public boolean verifyWebhookSignature(String payload, String razorpaySignature) {
+
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(
+                    webhookKeySecret.getBytes(StandardCharsets.UTF_8),
+                    "HmacSHA256"
+            );
+            mac.init(secretKey);
+
+            byte[] hash = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
+
+            // Convert bytes to hex string
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            return hexString.toString().equals(razorpaySignature);
+
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            log.error("Error during webhook signature verification", e);
+            return false;
+        }
+
     }
 }

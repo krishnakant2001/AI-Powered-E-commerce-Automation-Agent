@@ -9,5 +9,7 @@ public class OrderResponse {
     private Long id;
     private Long userId;
     private BigDecimal totalAmount;
+    private BigDecimal deliveryCharges;
+    private BigDecimal needToPay;
     private OrderStatus status;
 }

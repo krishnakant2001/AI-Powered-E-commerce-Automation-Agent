@@ -67,10 +67,13 @@ public class PaymentPage {
                             currency: "INR",
                             order_id: "%s",
                             handler: function(response) {
-                            document.getElementById("result").innerHTML =
-                                "<b>razorpayOrderId:</b> " + response.razorpay_order_id + "<br>" +
-                                "<b>razorpayPaymentId:</b> " + response.razorpay_payment_id + "<br>" +
-                                "<b>razorpaySignature:</b> " + response.razorpay_signature;
+                                console.log("Full Razorpay Response:", response);
+                                document.getElementById("result").innerHTML =
+                                    "<b>razorpayOrderId:</b> " + response.razorpay_order_id + "<br>" +
+                                    "<b>razorpayPaymentId:</b> " + response.razorpay_payment_id + "<br>" +
+                                    "<b>razorpaySignature:</b> " + response.razorpay_signature;
+                                document.getElementById("result").innerHTML =
+                                                "<pre>" + JSON.stringify(response, null, 2) + "</pre>";
                             }
                         };
                         var rzp = new Razorpay(options);

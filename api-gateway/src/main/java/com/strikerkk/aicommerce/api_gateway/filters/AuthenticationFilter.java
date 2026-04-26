@@ -25,6 +25,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     private static final List<String> PUBLIC_PATHS = List.of(
             "/users/auth/signup",
             "/users/auth/login",
+            "/payments/webhook/razorpay",
             "/payments/page/**"
     );
 

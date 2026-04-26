@@ -68,7 +68,7 @@ public class PaymentService {
         // Create Razorpay Order
         JSONObject razorpayOrderRequest = new JSONObject();
         razorpayOrderRequest.put(
-                "amount", orderResponse.getTotalAmount().multiply(BigDecimal.valueOf(100)).intValue()
+                "amount", orderResponse.getNeedToPay().multiply(BigDecimal.valueOf(100)).intValue()
         );
         razorpayOrderRequest.put("currency", "INR");
         razorpayOrderRequest.put("receipt", "order_" + request.getOrderId());
@@ -86,7 +86,7 @@ public class PaymentService {
         Payment payment = Payment.builder()
                 .orderId(request.getOrderId())
                 .userId(userId)
-                .amount(orderResponse.getTotalAmount())
+                .amount(orderResponse.getNeedToPay())
                 .status(PaymentStatus.INITIATED)
                 .gateway(PaymentGateway.RAZORPAY)
                 .gatewayOrderId(razorpayOrder.get("id"))
