@@ -8,6 +8,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.util.List;
@@ -17,11 +18,14 @@ import java.util.List;
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
 
     private final JwtService jwtService;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
 
     // Paths that skip JWT validation
     private static final List<String> PUBLIC_PATHS = List.of(
             "/users/auth/signup",
-            "/users/auth/login"
+            "/users/auth/login",
+            "/payments/page/**"
     );
 
     public AuthenticationFilter(JwtService jwtService) {
@@ -36,9 +40,12 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             final String path = exchange.getRequest().getURI().getPath();
 
             // Skip auth for public paths
-            if(PUBLIC_PATHS.contains(path)) {
+            if (PUBLIC_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, path))) {
                 return chain.filter(exchange);
             }
+//            if(PUBLIC_PATHS.contains(path)) {
+//                return chain.filter(exchange);
+//            }
 
 
             if(!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
