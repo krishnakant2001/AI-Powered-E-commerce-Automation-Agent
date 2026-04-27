@@ -30,6 +30,7 @@ public class AuthService {
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
+        log.info("User logging in...");
         String authToken = jwtService.generateAccessToken(userDetails.getUser());
 
         UserResponse userResponse = modelMapper.map(userDetails.getUser(), UserResponse.class);

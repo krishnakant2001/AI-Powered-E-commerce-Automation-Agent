@@ -3,6 +3,7 @@ package com.strikerkk.aicommerce.user_service.controller;
 import com.strikerkk.aicommerce.user_service.common.ApiResponse;
 import com.strikerkk.aicommerce.user_service.dto.request.CreateUserRequest;
 import com.strikerkk.aicommerce.user_service.dto.request.LoginUserRequest;
+import com.strikerkk.aicommerce.user_service.dto.request.UpdateUserDetailsRequest;
 import com.strikerkk.aicommerce.user_service.dto.response.AuthResponse;
 import com.strikerkk.aicommerce.user_service.dto.response.UserResponse;
 import com.strikerkk.aicommerce.user_service.service.AuthService;
@@ -51,6 +52,16 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Successfully fetch user details", userResponse));
+    }
+
+    @PutMapping("/update/user/details")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUserDetails(@RequestBody UpdateUserDetailsRequest request) {
+
+        UserResponse userResponse = userService.updateUserDetails(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Successfully update user details", userResponse));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -26,10 +26,15 @@ public class AddressService {
 
     public AddressResponse addAddress(AddressRequest request) {
 
-        String userId = UserContext.getUserId();
+        Long userId = Long.valueOf(UserContext.getUserId());
 
-        User user = userRepository.findById(Long.valueOf(userId))
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        log.info("Adding new address for userId={}", userId);
+
+        // Check if any address found for this user
+        boolean firstAddress = addressRepository.findAllByUserId(userId).isEmpty();
 
         // Adding new address
         Address newAddress = Address.builder()
@@ -40,7 +45,7 @@ public class AddressService {
                 .state(request.getState())
                 .country(request.getCountry())
                 .pinCode(request.getPinCode())
-                .isDefault(request.getIsDefault() != null ? request.getIsDefault() : false)
+                .isDefault(firstAddress)
                 .build();
 
         Address savedNewAddress = addressRepository.save(newAddress);
@@ -51,8 +56,10 @@ public class AddressService {
     public AddressResponse getAddressByAddressId(Long addressId) {
         Long userId = Long.valueOf(UserContext.getUserId());
 
-        Address address = addressRepository.findById(addressId)
+        Address address = addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address not present"));
+
+        log.info("Fetching address details for userId={} with addressId={}", userId, addressId);
 
         return modelMapper.map(address, AddressResponse.class);
 
@@ -60,9 +67,11 @@ public class AddressService {
 
     public List<AddressResponse> allAddresses() {
 
-        String userId = UserContext.getUserId();
+        Long userId = Long.valueOf(UserContext.getUserId());
 
-        List<Address> addressList = addressRepository.findAllByUserId(Long.valueOf(userId));
+        log.info("Getting all addresses for userId={}", userId);
+
+        List<Address> addressList = addressRepository.findAllByUserId(userId);
 
         return addressList
                 .stream()
@@ -77,6 +86,8 @@ public class AddressService {
 
         Address address = addressRepository.findByIdAndUserId(addressId, Long.valueOf(userId))
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
+
+        log.info("Updating address details for userId={} with addressId={}", userId, addressId);
 
         address.setHouseNo(request.getHouseNo());
         address.setStreet(request.getStreet());
@@ -106,6 +117,8 @@ public class AddressService {
 
         Address address = addressRepository.findByIdAndUserId(addressId, Long.valueOf(userId))
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
+
+        log.info("Deleting address for userId={} with addressId={}", userId, addressId);
 
         // If the address is default
         if (Boolean.TRUE.equals(address.getIsDefault())) {
