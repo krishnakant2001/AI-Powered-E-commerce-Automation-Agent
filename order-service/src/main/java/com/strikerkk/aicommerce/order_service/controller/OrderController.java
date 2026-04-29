@@ -25,7 +25,15 @@ public class OrderController {
         OrderResponse orderResponse = orderService.placeOrder(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success("You order has been successfully placed", orderResponse));
+                .body(ApiResponse.success("You order has been placed, Payment is pending", orderResponse));
+    }
+
+    @PostMapping("/buy-now")
+    public ResponseEntity<ApiResponse<OrderResponse>> buyNow(@RequestBody PlaceOrderRequest request) {
+        OrderResponse orderResponse = orderService.buyNow(request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Your order via buy now has been placed, Payment is pending", orderResponse));
     }
 
 

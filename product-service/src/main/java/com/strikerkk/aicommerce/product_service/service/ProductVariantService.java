@@ -41,9 +41,12 @@ public class ProductVariantService {
 
         ProductVariant savedProductVariant = productVariantRepository.save(productVariant);
 
+        log.info("Create product variant for product_id={}", productId);
+
         return modelMapper.map(savedProductVariant, ProductVariantResponse.class);
 
     }
+
 
     public ProductVariantResponse updateProductVariant(ProductVariantRequest request, Long productId, Long variantId) {
 
@@ -70,8 +73,11 @@ public class ProductVariantService {
 
         ProductVariant updatedVariant = productVariantRepository.save(productVariant);
 
+        log.info("Update product variant for product_id={} and variant_id={}", productId, variantId);
+
         return modelMapper.map(updatedVariant, ProductVariantResponse.class);
     }
+
 
     public void deleteProductVariant(Long productId, Long variantId) {
 
@@ -89,6 +95,8 @@ public class ProductVariantService {
         // Check if variant belongs to that product
         ProductVariant productVariant = productVariantRepository.findByIdAndProductId(variantId, productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Variant not found for this product"));
+
+        log.info("Delete product variant of product_id={} and variant_id={}", productId, variantId);
 
         productVariantRepository.delete(productVariant);
     }

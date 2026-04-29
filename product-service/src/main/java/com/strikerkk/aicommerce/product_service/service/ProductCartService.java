@@ -1,46 +1,50 @@
 package com.strikerkk.aicommerce.product_service.service;
 
-import com.strikerkk.aicommerce.product_service.dto.response.ProductCartResponse;
+import com.strikerkk.aicommerce.product_service.dto.clientResponse.ProductItemResponse;
 import com.strikerkk.aicommerce.product_service.entity.Product;
 import com.strikerkk.aicommerce.product_service.entity.ProductImage;
 import com.strikerkk.aicommerce.product_service.entity.ProductVariant;
 import com.strikerkk.aicommerce.product_service.exception.ResourceNotFoundException;
 import com.strikerkk.aicommerce.product_service.repository.ProductVariantRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductCartService {
 
     private final ProductVariantRepository variantRepository;
 
-    public ProductCartResponse getProductCartDetails(Long productId, Long variantId) {
+    public ProductItemResponse getProductItemDetails(Long productId, Long variantId) {
+
+        log.info("Getting product details which has to be add in user cart or order via buy now");
 
         ProductVariant productVariant = variantRepository.findByIdAndProductId(variantId, productId)
                 .orElseThrow( () -> new ResourceNotFoundException("Product variant is not found"));
 
         Product product = productVariant.getProduct();
 
-        ProductCartResponse productCartResponse = new ProductCartResponse();
+        ProductItemResponse productItemResponse = new ProductItemResponse();
 
-        productCartResponse.setProductId(product.getId());
-        productCartResponse.setProductName(product.getName());
-        productCartResponse.setBrandName(product.getBrand());
-        productCartResponse.setPrice(product.getPrice());
-        productCartResponse.setIsAvailable(product.getIsAvailable());
+        productItemResponse.setProductId(product.getId());
+        productItemResponse.setProductName(product.getName());
+        productItemResponse.setBrandName(product.getBrand());
+        productItemResponse.setPrice(product.getPrice());
+        productItemResponse.setIsAvailable(product.getIsAvailable());
 
-        productCartResponse.setVariantId(productVariant.getId());
-        productCartResponse.setSize(productVariant.getSize());
-        productCartResponse.setColor(productVariant.getColor());
-        productCartResponse.setInStock(productVariant.getStockCount() > 0);
+        productItemResponse.setVariantId(productVariant.getId());
+        productItemResponse.setSize(productVariant.getSize());
+        productItemResponse.setColor(productVariant.getColor());
+        productItemResponse.setInStock(productVariant.getStockCount() > 0);
 
 
         product.getImages().stream()
                 .filter(ProductImage::getIsPrimary)
                 .findFirst()
-                .ifPresent(img -> productCartResponse.setImageUrl(img.getUrl()));
+                .ifPresent(img -> productItemResponse.setImageUrl(img.getUrl()));
 
-        return productCartResponse;
+        return productItemResponse;
     }
 }

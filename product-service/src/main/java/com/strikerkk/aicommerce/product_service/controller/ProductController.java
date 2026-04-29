@@ -1,7 +1,7 @@
 package com.strikerkk.aicommerce.product_service.controller;
 
 import com.strikerkk.aicommerce.product_service.common.ApiResponse;
-import com.strikerkk.aicommerce.product_service.dto.response.ProductCartResponse;
+import com.strikerkk.aicommerce.product_service.dto.clientResponse.ProductItemResponse;
 import com.strikerkk.aicommerce.product_service.dto.response.ProductResponse;
 import com.strikerkk.aicommerce.product_service.service.ProductCartService;
 import com.strikerkk.aicommerce.product_service.service.ProductService;
@@ -40,8 +40,8 @@ public class ProductController {
     }
 
 
-    @GetMapping("/{productId}/variants/{variantId}/cart-info")
-    ProductCartResponse getProductCartInfo(@PathVariable Long productId, @PathVariable Long variantId) {
-        return productCartService.getProductCartDetails(productId, variantId);
+    @GetMapping("/{productId}/variants/{variantId}/item-info")
+    ProductItemResponse getProductItemDetails(@PathVariable Long productId, @PathVariable Long variantId) {
+        return productCartService.getProductItemDetails(productId, variantId);
     }
 }

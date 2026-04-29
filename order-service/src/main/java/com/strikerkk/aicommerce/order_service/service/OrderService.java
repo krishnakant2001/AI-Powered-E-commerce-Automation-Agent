@@ -2,9 +2,11 @@ package com.strikerkk.aicommerce.order_service.service;
 
 import com.strikerkk.aicommerce.order_service.auth.UserContext;
 import com.strikerkk.aicommerce.order_service.clients.CartClient;
+import com.strikerkk.aicommerce.order_service.clients.ProductClient;
 import com.strikerkk.aicommerce.order_service.clients.UserClient;
 import com.strikerkk.aicommerce.order_service.dto.ClientResponse.AddressResponse;
 import com.strikerkk.aicommerce.order_service.dto.ClientResponse.CartItemResponse;
+import com.strikerkk.aicommerce.order_service.dto.ClientResponse.ProductItemResponse;
 import com.strikerkk.aicommerce.order_service.dto.request.PlaceOrderRequest;
 import com.strikerkk.aicommerce.order_service.dto.response.OrderItemResponse;
 import com.strikerkk.aicommerce.order_service.dto.response.OrderResponse;
@@ -31,13 +33,19 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CartClient cartClient;
     private final UserClient userClient;
+    private final ProductClient productClient;
     private final ModelMapper modelMapper;
 
     @Transactional
     public OrderResponse placeOrder(PlaceOrderRequest request) {
+
         Long userId = Long.valueOf(UserContext.getUserId());
+
         List<CartItemResponse> cartItems = cartClient.getCartItems();
+
         AddressResponse address = userClient.getAddressByAddressId(request.getAddressId());
+
+        log.info("Placing the order by userId={}", userId);
 
         if(cartItems == null || cartItems.isEmpty()) {
             throw new RuntimeException("Cart is empty, cannot place order");
@@ -98,8 +106,69 @@ public class OrderService {
                 + address.getPinCode());
 
         return orderResponse;
-
     }
+
+
+    public OrderResponse buyNow(PlaceOrderRequest request) {
+
+        Long userId = Long.valueOf(UserContext.getUserId());
+
+        if(!userId.equals(request.getUserId())) {
+            throw new RuntimeException("User is not matching with auth userId");
+        }
+
+        ProductItemResponse itemResponse = productClient.getProductItemDetails(request.getProductId(), request.getVariantId());
+        AddressResponse address = userClient.getAddressByAddressId(request.getAddressId());
+
+        log.info("Buying now item order by userId={}", userId);
+
+        OrderItem orderItem = OrderItem.builder()
+                .productId(request.getProductId())
+                .variantId(itemResponse.getVariantId())
+                .productName(itemResponse.getProductName())
+                .productBrand(itemResponse.getBrandName())
+                .productImageUrl(itemResponse.getImageUrl())
+                .size(itemResponse.getSize())
+                .color(itemResponse.getColor())
+                .quantity(1)
+                .priceAtOrder(itemResponse.getPrice())
+                .lineTotal(itemResponse.getPrice())
+                .build();
+
+        BigDecimal thresholdAmount = BigDecimal.valueOf(1999);
+        BigDecimal totalAmount = orderItem.getLineTotal();
+        BigDecimal deliveryCharges =
+                (totalAmount.compareTo(thresholdAmount) > 0)
+                        ? BigDecimal.valueOf(0)
+                        : BigDecimal.valueOf(40);
+
+        BigDecimal finalAmount = totalAmount.add(deliveryCharges);
+
+        Order order = Order.builder()
+                .userId(userId)
+                .addressId(request.getAddressId())
+                .totalAmount(orderItem.getLineTotal())
+                .deliveryCharges(deliveryCharges)
+                .needToPay(finalAmount)
+                .status(OrderStatus.PENDING)
+                .build();
+
+        orderItem.setOrder(order);
+
+        List<OrderItem> orderItems = List.of(orderItem);
+        order.setOrderItems(orderItems);
+
+        Order savedOrder = orderRepository.save(order);
+
+        OrderResponse orderResponse =  modelMapper.map(savedOrder, OrderResponse.class);
+
+        orderResponse.setAddress(address.getHouseNo() + " " + address.getStreet() + " " +
+                address.getCity() + " " + address.getState() + " " + address.getCountry() + " "
+                + address.getPinCode());
+
+        return orderResponse;
+    }
+
 
     public OrderResponse getOrderById(Long orderId) {
         Long userId = Long.valueOf(UserContext.getUserId());
@@ -107,13 +176,18 @@ public class OrderService {
         Order order = orderRepository.findByIdAndUserId(orderId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order is not found"));
 
+        log.info("Fetching order details with orderId={} and userId={}", orderId, userId);
+
         return modelMapper.map(order, OrderResponse.class);
     }
+
 
     public List<OrderSummaryResponse> getOrdersByUserId() {
         Long userId = Long.valueOf(UserContext.getUserId());
 
         List<Order> orderList = orderRepository.findAllByUserId(userId);
+
+        log.info("Getting list of all orders placed by userId={}", userId);
 
         return orderList.stream()
                 .map(order -> {
@@ -145,6 +219,8 @@ public class OrderService {
             throw new RuntimeException("Delivered order cannot be cancelled");
         }
 
+        log.info("Cancelling the order for orderId={} by userId={}", orderId, userId);
+
         order.setStatus(OrderStatus.CANCELLED);
         Order savedOrder = orderRepository.save(order);
 
@@ -156,6 +232,8 @@ public class OrderService {
 
         Order order = orderRepository.findByIdAndUserId(orderId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        log.info("Getting order items for orderId={} by userId={}", orderId, userId);
 
         return order.getOrderItems()
                 .stream()

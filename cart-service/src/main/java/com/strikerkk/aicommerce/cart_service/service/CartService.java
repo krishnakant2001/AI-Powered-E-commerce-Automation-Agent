@@ -41,10 +41,13 @@ public class CartService {
 
         Cart cart = getOrCreateCart(userId);
 
+        log.info("Fetching all items in the cart for user_id={}", userId);
+
         boolean isEnriched = syncCartWithLatestProductData(cart);
 
         return mapToCartResponse(cart, isEnriched);
     }
+
 
     public CartResponse addItemToCart(AddCartItemRequest request) {
         Long userId = Long.valueOf(UserContext.getUserId());
@@ -59,6 +62,8 @@ public class CartService {
         }
         else {
             ProductCartResponse response = productClient.getProductCartInfo(request.getProductId(), request.getVariantId());
+
+            log.info("Adding new item into the cart");
 
             if(!response.getInStock()) {
                 throw new IllegalStateException("Product variant is out of stock. productId=" + request.getProductId()
@@ -86,11 +91,13 @@ public class CartService {
         return mapToCartResponse(cart);
     }
 
+
     public CartItemResponse updateCartItem(@Valid UpdateCartItemRequest request, Long cartItemId) {
 
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart Item is not found"));
 
+        log.info("Update item quantity into the cart");
 
         cartItem.setQuantity(request.getQuantity());
         cartItemRepository.save(cartItem);
@@ -102,6 +109,7 @@ public class CartService {
 
         return cartItemResponse;
     }
+
 
     @Transactional
     public void deleteItemFromCart(Long cartItemId) {
@@ -115,8 +123,11 @@ public class CartService {
             throw new AccessDeniedException("Unauthorized request");
         }
 
+        log.info("Delete item from the cart with cartItemId={}", cartItemId);
+
         cartItemRepository.delete(cartItem);
     }
+
 
     @Transactional
     public void clearCart() {
@@ -124,6 +135,8 @@ public class CartService {
 
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No cart found for userId "+ userId));
+
+        log.info("Clearing the cart items");
 
         // Delete cart items instead of whole cart
         cartItemRepository.deleteAllByCartId(cart.getId());
@@ -151,6 +164,8 @@ public class CartService {
     private boolean syncCartWithLatestProductData(Cart cart) {
 
         boolean isUpdated = false;
+
+        log.info("Syncing cart items with latest product data");
 
         for(CartItem item : cart.getCartItems()) {
             ProductCartResponse response = productClient.getProductCartInfo(item.getProductId(), item.getVariantId());

@@ -38,8 +38,11 @@ public class ProductImageService {
 
         ProductImage savedProductImage = productImageRepository.save(productImage);
 
+        log.info("Create product image of product_id={}}", productId);
+
         return modelMapper.map(savedProductImage, ProductImageResponse.class);
     }
+
 
     public ProductImageResponse updateProductImage(ProductImageRequest request, Long productId, Long imageId) {
 
@@ -65,8 +68,11 @@ public class ProductImageService {
 
         ProductImage updatedImage = productImageRepository.save(productImage);
 
+        log.info("Update product image of product_id={} and image_id={}", productId, imageId);
+
         return modelMapper.map(updatedImage, ProductImageResponse.class);
     }
+
 
     public void deleteProductImage(Long productId, Long imageId) {
 
@@ -84,6 +90,8 @@ public class ProductImageService {
         // Check if image belongs to that product
         ProductImage productImage = productImageRepository.findByIdAndProductId(imageId, productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Image not found for this product"));
+
+        log.info("Delete product image of product_id={} and image_id={}", productId, imageId);
 
         productImageRepository.delete(productImage);
     }

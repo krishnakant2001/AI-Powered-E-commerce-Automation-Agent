@@ -43,27 +43,35 @@ public class ProductService {
 
         Product savedProduct = productRepository.save(newProduct);
 
+        log.info("Creating a new product by admin id={}", userId);
+
         return modelMapper.map(savedProduct, ProductResponse.class);
 
     }
 
+
     public List<ProductResponse> getAllProducts() {
 
         List<Product> productList = productRepository.findAll();
+
+        log.info("Fetching all products from product db");
 
         return productList.stream()
                 .map(product -> modelMapper.map(product, ProductResponse.class))
                 .toList();
     }
 
+
     public ProductResponse getProductDetails(Long productId) {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
-        return modelMapper.map(product, ProductResponse.class);
+        log.info("Getting product details of productId={}", productId);
 
+        return modelMapper.map(product, ProductResponse.class);
     }
+
 
     public ProductResponse updateProduct(ProductRequest request, Long productId) {
 
@@ -87,9 +95,11 @@ public class ProductService {
 
         Product updatedProduct = productRepository.save(product);
 
-        return modelMapper.map(updatedProduct, ProductResponse.class);
+        log.info("Updating product details of productId={} by admin id={}", productId, userId);
 
+        return modelMapper.map(updatedProduct, ProductResponse.class);
     }
+
 
     public void deleteProduct(Long productId) {
 
@@ -97,6 +107,8 @@ public class ProductService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product is not found"));
+
+        log.info("Deleting product of productId={} by admin id={}", productId, userId);
 
         // Authorization check
         if (!product.getCreatedBy().equals(userId)) {
