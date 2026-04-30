@@ -4,12 +4,14 @@ import com.strikerkk.aicommerce.payment_service.entity.Payment;
 import com.strikerkk.aicommerce.payment_service.entity.Refund;
 import com.strikerkk.aicommerce.payment_service.entity.enums.PaymentStatus;
 import com.strikerkk.aicommerce.payment_service.entity.enums.RefundStatus;
+import com.strikerkk.aicommerce.payment_service.event.PaymentSuccessEvent;
 import com.strikerkk.aicommerce.payment_service.payment.VerifySignature;
 import com.strikerkk.aicommerce.payment_service.repository.PaymentRepository;
 import com.strikerkk.aicommerce.payment_service.repository.RefundRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ public class WebhookService {
     private final VerifySignature verifySignature;
     private final PaymentRepository paymentRepository;
     private final RefundRepository refundRepository;
+    private final KafkaTemplate<Long, PaymentSuccessEvent> paymentSuccessEventKafkaTemplate;
 
     public void handleRazorpayWebhook(String payload, String razorpaySignature) {
 
@@ -69,7 +72,15 @@ public class WebhookService {
             paymentRepository.save(payment);
             log.info("Webhook: Payment SUCCESS for orderId: {}", payment.getOrderId());
 
-            // TODO: Call Order Service to update status to CONFIRMED
+            // Publish Kafka event to update order status to CONFIRMED in Order Service
+            PaymentSuccessEvent paymentSuccessEvent = PaymentSuccessEvent.builder()
+                    .id(payment.getId())
+                    .userId(payment.getUserId())
+                    .orderId(payment.getOrderId())
+                    .paymentStatus(payment.getStatus().toString())
+                    .build();
+
+            paymentSuccessEventKafkaTemplate.send("payment-success-topic", paymentSuccessEvent);
 
         } else {
             log.info("Webhook: payment.captured received but payment already in {} status, skipping",

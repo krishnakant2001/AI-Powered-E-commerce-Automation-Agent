@@ -19,7 +19,7 @@ public class ProductCartService {
 
     public ProductItemResponse getProductItemDetails(Long productId, Long variantId) {
 
-        log.info("Getting product details which has to be add in user cart or order via buy now");
+        log.info("Getting product details with productId={} and variantId={}", productId, variantId);
 
         ProductVariant productVariant = variantRepository.findByIdAndProductId(variantId, productId)
                 .orElseThrow( () -> new ResourceNotFoundException("Product variant is not found"));
@@ -31,7 +31,7 @@ public class ProductCartService {
         productItemResponse.setProductId(product.getId());
         productItemResponse.setProductName(product.getName());
         productItemResponse.setBrandName(product.getBrand());
-        productItemResponse.setPrice(product.getPrice());
+        productItemResponse.setPrice(productVariant.getPriceOverride());
         productItemResponse.setIsAvailable(product.getIsAvailable());
 
         productItemResponse.setVariantId(productVariant.getId());
