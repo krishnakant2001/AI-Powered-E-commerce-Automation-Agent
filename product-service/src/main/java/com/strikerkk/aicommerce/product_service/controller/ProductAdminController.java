@@ -108,8 +108,8 @@ public class ProductAdminController {
 
     // Product image API
 
-    @PostMapping("/{productId}/add/images")
     @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{productId}/add/images")
     ResponseEntity<ApiResponse<ProductImageResponse>> createProductImage(@Valid @RequestBody ProductImageRequest request,
                                                                          @PathVariable Long productId) {
 
@@ -121,8 +121,8 @@ public class ProductAdminController {
     }
 
 
-    @PutMapping("/{productId}/update/images/{imageId}/primaryImage")
     @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{productId}/update/images/{imageId}/primaryImage")
     ResponseEntity<ApiResponse<ProductImageResponse>> updateProductImage(@Valid @RequestBody ProductImageRequest request,
                                                                          @PathVariable Long productId,
                                                                          @PathVariable Long imageId) {
@@ -135,8 +135,8 @@ public class ProductAdminController {
     }
 
 
-    @DeleteMapping("/{productId}/delete/images/{imageId}")
     @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{productId}/delete/images/{imageId}")
     ResponseEntity<ApiResponse<Void>> deleteProductImage(@PathVariable Long productId,
                                                          @PathVariable Long imageId) {
 

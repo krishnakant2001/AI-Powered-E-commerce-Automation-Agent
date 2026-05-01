@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface ProductClient {
 
     @GetMapping("/products/{productId}/variants/{variantId}/item-info")
-    ProductCartResponse getProductCartInfo(@PathVariable Long productId, @PathVariable Long variantId);
+    ProductCartResponse getProductItemDetails(@PathVariable Long productId, @PathVariable Long variantId);
 
 }

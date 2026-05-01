@@ -61,7 +61,7 @@ public class CartService {
             updateExistingItem(existingItemOpt.get(), request.getQuantity());
         }
         else {
-            ProductCartResponse response = productClient.getProductCartInfo(request.getProductId(), request.getVariantId());
+            ProductCartResponse response = productClient.getProductItemDetails(request.getProductId(), request.getVariantId());
 
             log.info("Adding new item into the cart");
 
@@ -168,7 +168,7 @@ public class CartService {
         log.info("Syncing cart items with latest product data");
 
         for(CartItem item : cart.getCartItems()) {
-            ProductCartResponse response = productClient.getProductCartInfo(item.getProductId(), item.getVariantId());
+            ProductCartResponse response = productClient.getProductItemDetails(item.getProductId(), item.getVariantId());
 
             if(!response.getIsAvailable()) {
                 cartItemRepository.delete(item);
