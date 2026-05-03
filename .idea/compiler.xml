@@ -10,7 +10,7 @@
         <module name="cart-service" />
         <module name="discovery-server" />
       </profile>
-      <profile name="Annotation profile for product-service" enabled="true">
+      <profile name="Annotation profile for agent-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -22,11 +22,13 @@
         <module name="order-service" />
         <module name="payment-service" />
         <module name="user-service" />
+        <module name="agent-service" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="agent-service" options="-parameters" />
       <module name="api-gateway" options="-parameters" />
       <module name="cart-service" options="-parameters" />
       <module name="discovery-server" options="-parameters" />
