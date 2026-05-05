@@ -29,7 +29,8 @@ public class JwtService {
 
         return new TokenClaims(
                 claims.getSubject(),
-                claims.get("role", String.class)
+                claims.get("role", String.class),
+                claims.get("email", String.class)
         );
     }
 

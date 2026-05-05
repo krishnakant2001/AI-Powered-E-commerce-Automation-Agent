@@ -9,6 +9,14 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: agent-service
+          uri: lb://AGENT-SERVICE
+          predicates:
+          - Path=/api/v1/agent/**
+          filters:
+          - StripPrefix=2
+          - AuthenticationFilter
+
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:

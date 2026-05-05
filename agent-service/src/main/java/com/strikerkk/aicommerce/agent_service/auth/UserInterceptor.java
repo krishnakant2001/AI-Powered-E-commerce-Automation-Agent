@@ -13,6 +13,7 @@ public class UserInterceptor implements HandlerInterceptor {
 
         String userId = request.getHeader("X-user-id");
         String userRole = request.getHeader("X-user-role");
+        String userEmail = request.getHeader("X-user-email");
 
         if(userId != null) {
             UserContext.setUserId(userId);
@@ -20,6 +21,10 @@ public class UserInterceptor implements HandlerInterceptor {
 
         if(userRole != null) {
             UserContext.setUserRole(userRole);
+        }
+
+        if(userEmail != null) {
+            UserContext.setUserEmail(userEmail);
         }
 
         return true;

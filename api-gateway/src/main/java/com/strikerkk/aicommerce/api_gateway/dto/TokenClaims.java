@@ -6,4 +6,5 @@ import lombok.Data;
 public class TokenClaims {
     private final String userId;
     private final String role;
+    private final String email;
 }

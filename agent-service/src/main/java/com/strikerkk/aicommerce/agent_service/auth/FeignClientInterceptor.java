@@ -11,12 +11,16 @@ public class FeignClientInterceptor implements RequestInterceptor {
     public void apply(RequestTemplate requestTemplate) {
         String userId = UserContext.getUserId();
         String userRole = UserContext.getUserRole();
+        String userEmail = UserContext.getUserEmail();
 
         if(userId != null) {
             requestTemplate.header("X-user-id", userId);
         }
         if(userRole != null) {
             requestTemplate.header("X-user-role", userRole);
+        }
+        if(userEmail != null) {
+            requestTemplate.header("X-user-email", userEmail);
         }
     }
 }

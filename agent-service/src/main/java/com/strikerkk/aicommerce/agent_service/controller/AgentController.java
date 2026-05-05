@@ -4,6 +4,7 @@ import com.strikerkk.aicommerce.agent_service.common.ApiResponse;
 import com.strikerkk.aicommerce.agent_service.dto.request.ChatRequest;
 import com.strikerkk.aicommerce.agent_service.dto.request.StartSessionRequest;
 import com.strikerkk.aicommerce.agent_service.dto.response.*;
+import com.strikerkk.aicommerce.agent_service.service.AgentSessionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AgentController {
 
+    private final AgentSessionService agentSessionService;
+
     @PostMapping("/chat")
     ResponseEntity<ApiResponse<ChatResponse>> chat(@Valid @RequestBody ChatRequest request) {
         return ResponseEntity
@@ -26,9 +29,12 @@ public class AgentController {
 
     @PostMapping("/session/start")
     ResponseEntity<ApiResponse<StartSessionResponse>> startSession(@RequestBody(required = false) StartSessionRequest request) {
+
+        StartSessionResponse response = agentSessionService.startSession(request);
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Session started successfully"));
+                .body(ApiResponse.success("Session started successfully", response));
     }
 
     @GetMapping("/session/{sessionId}")

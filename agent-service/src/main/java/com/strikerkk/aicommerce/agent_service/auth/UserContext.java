@@ -4,6 +4,7 @@ public class UserContext {
 
     private static final ThreadLocal<String> userId = new ThreadLocal<>();
     private static final ThreadLocal<String> userRole = new ThreadLocal<>();
+    private static final ThreadLocal<String> userEmail = new ThreadLocal<>();
 
     public static void setUserId(String id) {
         userId.set(id);
@@ -19,6 +20,14 @@ public class UserContext {
 
     public static String getUserRole() {
         return userRole.get();
+    }
+
+    public static void setUserEmail(String email) {
+        userEmail.set(email);
+    }
+
+    public static String getUserEmail() {
+        return userEmail.get();
     }
 
     public static void clear() {
