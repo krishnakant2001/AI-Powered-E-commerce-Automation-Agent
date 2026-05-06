@@ -8,4 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface AgentSessionRepository extends JpaRepository<AgentSession, UUID> {
+
+    int countBySession_SessionId(UUID sessionId);
 }

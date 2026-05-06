@@ -1,12 +1,14 @@
 package com.strikerkk.aicommerce.agent_service.dto.response;
 
 import com.strikerkk.aicommerce.agent_service.entity.enums.SessionStatus;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
+@Builder
 public class SessionStatusResponse {
 
     private UUID sessionId;
