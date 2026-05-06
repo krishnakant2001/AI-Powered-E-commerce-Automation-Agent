@@ -39,13 +39,19 @@ public class AgentController {
 
     @GetMapping("/session/{sessionId}")
     ResponseEntity<ApiResponse<SessionStatusResponse>> getSessionStatus(@PathVariable UUID sessionId) {
+
+        SessionStatusResponse response = agentSessionService.getSessionStatus(sessionId);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Session fetched successfully"));
+                .body(ApiResponse.success("Session fetched successfully", response));
     }
 
     @DeleteMapping("/session/{sessionId}/end")
     ResponseEntity<ApiResponse<Void>> endSession(@PathVariable UUID sessionId) {
+
+        agentSessionService.endSession(sessionId);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Session ended successfully"));
@@ -53,22 +59,31 @@ public class AgentController {
 
     @GetMapping("/session/{sessionId}/history")
     ResponseEntity<ApiResponse<ConversationHistoryResponse>> getConversationHistory(@PathVariable UUID sessionId) {
+
+        ConversationHistoryResponse response = agentSessionService.getConversationHistory(sessionId);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Session history fetched successfully"));
+                .body(ApiResponse.success("Session history fetched successfully", response));
     }
 
     @GetMapping("/session/my")
     ResponseEntity<ApiResponse<MySessionResponse>> getMySession() {
+
+        MySessionResponse response = agentSessionService.getMySessions();
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("My all sessions fetched successfully"));
+                .body(ApiResponse.success("My all sessions fetched successfully", response));
     }
 
     @GetMapping("/session/{sessionId}/actions")
     ResponseEntity<ApiResponse<SessionActionResponse>> getSessionAction(@PathVariable UUID sessionId) {
+
+        SessionActionResponse response = agentSessionService.getSessionActions(sessionId);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Session actions fetched successfully"));
+                .body(ApiResponse.success("Session actions fetched successfully", response));
     }
 }

@@ -2,19 +2,24 @@ package com.strikerkk.aicommerce.agent_service.service;
 
 import com.strikerkk.aicommerce.agent_service.auth.UserContext;
 import com.strikerkk.aicommerce.agent_service.dto.request.StartSessionRequest;
-import com.strikerkk.aicommerce.agent_service.dto.response.SessionStatusResponse;
-import com.strikerkk.aicommerce.agent_service.dto.response.StartSessionResponse;
+import com.strikerkk.aicommerce.agent_service.dto.response.*;
+import com.strikerkk.aicommerce.agent_service.dto.summary.SessionSummary;
 import com.strikerkk.aicommerce.agent_service.entity.AgentAction;
+import com.strikerkk.aicommerce.agent_service.entity.AgentMessage;
 import com.strikerkk.aicommerce.agent_service.entity.AgentSession;
+import com.strikerkk.aicommerce.agent_service.entity.enums.ActionStatus;
+import com.strikerkk.aicommerce.agent_service.entity.enums.ActionType;
 import com.strikerkk.aicommerce.agent_service.entity.enums.SessionStatus;
 import com.strikerkk.aicommerce.agent_service.exception.SessionNotFoundException;
 import com.strikerkk.aicommerce.agent_service.exception.UnauthorizedSessionAccessException;
 import com.strikerkk.aicommerce.agent_service.model.ConversationMessage;
 import com.strikerkk.aicommerce.agent_service.model.SessionContext;
 import com.strikerkk.aicommerce.agent_service.repository.AgentActionRepository;
+import com.strikerkk.aicommerce.agent_service.repository.AgentMessageRepository;
 import com.strikerkk.aicommerce.agent_service.repository.AgentSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +33,9 @@ public class AgentSessionService {
 
     private final AgentSessionRepository agentSessionRepository;
     private final AgentActionRepository agentActionRepository;
+    private final AgentMessageRepository agentMessageRepository;
     private final SessionContextService sessionContextService;
+    private final ModelMapper modelMapper;
 
     @Transactional
     public StartSessionResponse startSession(StartSessionRequest request) {
@@ -91,7 +98,7 @@ public class AgentSessionService {
 
         AgentSession session = findAndValidateSession(sessionId, userId);
 
-        int totalMessages = agentSessionRepository.countBySession_SessionId(sessionId);
+        int totalMessages = agentMessageRepository.countBySession_SessionId(sessionId);
         List<AgentAction> actions = agentActionRepository.findBySession_SessionIdOrderByCreatedAtAsc(sessionId);
 
 
@@ -163,6 +170,87 @@ public class AgentSessionService {
 
     }
 
+    public ConversationHistoryResponse getConversationHistory(UUID sessionId) {
+        Long userId = Long.valueOf(UserContext.getUserId());
+
+        findAndValidateSession(sessionId, userId);
+
+        log.info("Getting conversation history userId={} and sessionId={}", userId, sessionId);
+
+        List<AgentMessage> messages = agentMessageRepository.findBySession_SessionIdOrderBySequenceNumberAsc(sessionId);
+
+        if(messages.isEmpty()) {
+            throw new RuntimeException("No conversation history found for sessionId: " + sessionId);
+        }
+
+        List<MessageResponse> messageResponses = messages
+                .stream()
+                .map(msg -> modelMapper.map(msg, MessageResponse.class))
+                .toList();
+
+        return ConversationHistoryResponse.builder()
+                .sessionId(sessionId)
+                .totalMessages(messages.size())
+                .messages(messageResponses)
+                .build();
+    }
+
+    public MySessionResponse getMySessions() {
+        Long userId = Long.valueOf(UserContext.getUserId());
+
+        log.info("Getting all sessions for userId: {}", userId);
+
+        List<AgentSession> sessions = agentSessionRepository.findByUserIdOrderByCreatedAtDesc(userId);
+
+        List<SessionSummary> summaries = sessions
+                .stream()
+                .map(session ->
+                {
+
+                    int totalMessages = agentMessageRepository.countBySession_SessionId(session.getSessionId());
+                    List<AgentAction> actions = agentActionRepository.findBySession_SessionIdOrderByCreatedAtAsc(session.getSessionId());
+
+                    String outcome = buildOutcomeString(session, actions);
+
+                    SessionSummary summary = modelMapper.map(session, SessionSummary.class);
+
+                    summary.setOutcome(outcome);
+                    summary.setTotalMessages(totalMessages);
+                    summary.setTotalActions(actions.size());
+
+                    return summary;
+
+                })
+                .toList();
+
+
+        return MySessionResponse.builder()
+                .totalSessions(sessions.size())
+                .sessions(summaries)
+                .build();
+    }
+
+    public SessionActionResponse getSessionActions(UUID sessionId) {
+        Long userId = Long.valueOf(UserContext.getUserId());
+
+        log.info("Getting session actions userId={} session={}", userId, sessionId);
+
+        findAndValidateSession(sessionId, userId);
+
+        List<AgentAction> actions = agentActionRepository.findBySession_SessionIdOrderByCreatedAtAsc(sessionId);
+
+        List<ActionResponse> actionResponses = actions
+                .stream()
+                .map(action -> modelMapper.map(action, ActionResponse.class))
+                .toList();
+
+        return SessionActionResponse.builder()
+                .sessionId(sessionId)
+                .totalActions(actions.size())
+                .actions(actionResponses)
+                .build();
+    }
+
     private AgentSession findAndValidateSession(UUID sessionId, Long userId) {
         AgentSession session = agentSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new SessionNotFoundException(sessionId.toString()));
@@ -172,5 +260,44 @@ public class AgentSessionService {
         }
 
         return session;
+    }
+
+    // Build a readable outcome string for the sessions list
+    private String buildOutcomeString(AgentSession session, List<AgentAction> actions) {
+
+        // Look for a successful order action
+        Optional<AgentAction> orderAction = actions
+                .stream()
+                .filter(action -> (action.getActionType() == ActionType.PLACE_ORDER ||
+                        action.getActionType() == ActionType.BUY_NOW) &&
+                        action.getStatus() == ActionStatus.SUCCESS)
+                .findFirst();
+
+        if(orderAction.isPresent()) {
+            String resourceId = orderAction.get().getResourceId();
+            return resourceId != null
+                    ? "Order #" + resourceId + " placed successfully"
+                    : "Order placed successfully";
+        }
+
+        // Look for a successful payment action
+        Optional<AgentAction> paymentAction = actions
+                .stream()
+                .filter(action -> action.getActionType() == ActionType.INITIATE_PAYMENT &&
+                        action.getStatus() == ActionStatus.SUCCESS)
+                .findFirst();
+
+        if(paymentAction.isPresent()) {
+            return "Payment initiated - awaiting completion";
+        }
+
+        // Session status based fallback
+        return switch (session.getStatus()) {
+            case COMPLETED -> "Completed Successfully";
+            case FAILED -> "Session failed - please try again";
+            case CLOSED -> "Session closed without completing";
+            case CLARIFYING -> "Waiting for your response";
+            default -> "In progress";
+        };
     }
 }
