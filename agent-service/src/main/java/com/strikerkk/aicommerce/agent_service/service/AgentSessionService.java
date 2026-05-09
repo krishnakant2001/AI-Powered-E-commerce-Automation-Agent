@@ -9,6 +9,7 @@ import com.strikerkk.aicommerce.agent_service.entity.AgentMessage;
 import com.strikerkk.aicommerce.agent_service.entity.AgentSession;
 import com.strikerkk.aicommerce.agent_service.entity.enums.ActionStatus;
 import com.strikerkk.aicommerce.agent_service.entity.enums.ActionType;
+import com.strikerkk.aicommerce.agent_service.entity.enums.MessageRole;
 import com.strikerkk.aicommerce.agent_service.entity.enums.SessionStatus;
 import com.strikerkk.aicommerce.agent_service.exception.SessionNotFoundException;
 import com.strikerkk.aicommerce.agent_service.exception.UnauthorizedSessionAccessException;
@@ -299,5 +300,24 @@ public class AgentSessionService {
             case CLARIFYING -> "Waiting for your response";
             default -> "In progress";
         };
+    }
+
+    @Transactional
+    public AgentMessage saveMessage(AgentSession session, MessageRole role, String content,
+                                   String toolName, String toolInput, String toolOutput) {
+
+        int nextSequence = agentMessageRepository.countBySession_SessionId(session.getSessionId());
+
+        AgentMessage message = AgentMessage.builder()
+                .session(session)
+                .role(role)
+                .content(content)
+                .toolName(toolName)
+                .toolInput(toolInput)
+                .toolOutput(toolOutput)
+                .sequenceNumber(nextSequence)
+                .build();
+
+        return agentMessageRepository.save(message);
     }
 }

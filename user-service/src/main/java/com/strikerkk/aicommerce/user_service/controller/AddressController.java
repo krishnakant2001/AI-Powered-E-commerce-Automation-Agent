@@ -29,7 +29,7 @@ public class AddressController {
     }
 
     @GetMapping("/address/all")
-    public ResponseEntity<ApiResponse<List<AddressResponse>>> allAddresses() {
+    public ResponseEntity<ApiResponse<List<AddressResponse>>> getAllAddresses() {
 
         List<AddressResponse> addressResponseList = addressService.allAddresses();
 

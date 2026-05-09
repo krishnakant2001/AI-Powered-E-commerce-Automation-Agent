@@ -21,7 +21,7 @@ public class ProductController {
     private final ProductCartService productCartService;
 
     @GetMapping("/all")
-    ResponseEntity<ApiResponse<List<ProductResponse>>> allProducts() {
+    ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts() {
 
         List<ProductResponse> productResponseList = productService.getAllProducts();
 
@@ -31,7 +31,7 @@ public class ProductController {
 
 
     @GetMapping("/details/{productId}")
-    ResponseEntity<ApiResponse<ProductResponse>> productDetails(@PathVariable Long productId) {
+    ResponseEntity<ApiResponse<ProductResponse>> getProductDetails(@PathVariable Long productId) {
 
         ProductResponse productResponse = productService.getProductDetails(productId);
 
