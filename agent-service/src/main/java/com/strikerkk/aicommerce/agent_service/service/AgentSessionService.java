@@ -320,4 +320,29 @@ public class AgentSessionService {
 
         return agentMessageRepository.save(message);
     }
+
+    @Transactional
+    public AgentAction saveAction(AgentSession session, Long userId, ActionType actionType, String requestPayload) {
+        AgentAction action = AgentAction.builder()
+                .session(session)
+                .userId(userId)
+                .actionType(actionType)
+                .requestPayload(requestPayload)
+                .status(ActionStatus.PENDING)
+                .build();
+
+        return agentActionRepository.save(action);
+    }
+
+    @Transactional
+    public void updateActionResult(UUID actionId, ActionStatus status, String responsePayload, String resourceId, String failureReason) {
+        agentActionRepository.findById(actionId).ifPresent(action -> {
+            action.setStatus(status);
+            action.setResponsePayload(responsePayload);
+            action.setResourceId(resourceId);
+            action.setFailureReason(failureReason);
+
+            agentActionRepository.save(action);
+        });
+    }
 }
