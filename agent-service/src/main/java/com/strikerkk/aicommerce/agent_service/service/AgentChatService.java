@@ -6,12 +6,14 @@ import com.strikerkk.aicommerce.agent_service.auth.UserContext;
 import com.strikerkk.aicommerce.agent_service.dto.request.ChatRequest;
 import com.strikerkk.aicommerce.agent_service.dto.request.StartSessionRequest;
 import com.strikerkk.aicommerce.agent_service.dto.response.ChatResponse;
+import com.strikerkk.aicommerce.agent_service.dto.summary.ActionSummary;
 import com.strikerkk.aicommerce.agent_service.dto.summary.ToolCallSummary;
 import com.strikerkk.aicommerce.agent_service.entity.AgentAction;
 import com.strikerkk.aicommerce.agent_service.entity.AgentSession;
 import com.strikerkk.aicommerce.agent_service.entity.enums.ActionStatus;
 import com.strikerkk.aicommerce.agent_service.entity.enums.ActionType;
 import com.strikerkk.aicommerce.agent_service.entity.enums.MessageRole;
+import com.strikerkk.aicommerce.agent_service.entity.enums.SessionStatus;
 import com.strikerkk.aicommerce.agent_service.exception.AgentException;
 import com.strikerkk.aicommerce.agent_service.llm.SystemPromptBuilder;
 import com.strikerkk.aicommerce.agent_service.llm.ToolDefinitionBuilder;
@@ -59,9 +61,11 @@ public class AgentChatService {
         AgentSession session = resolveSession(userId, request.getSessionId());
         UUID sessionId = session.getSessionId();
 
+
         // Step 2: Load SessionContext from Redis
         SessionContext sessionContext = sessionContextService.findBySessionId(sessionId)
                 .orElseGet(() -> rebuildContextFromPostgres(session, userId));
+
 
         // Step 3: Append user message to Redis context
         ConversationMessage newUserMessage = ConversationMessage.builder()
@@ -204,7 +208,69 @@ public class AgentChatService {
                 continue;
             }
 
+            // LLM paused to ask for clarification (pause_turn)
+            if("pause_turn".equals(stopReason)) {
+                finalResponse = extractTextFromContent(contentArray);
+
+                // Detect what the agent is waiting for based on response content
+                String waitingFor = detectClarificationTopic(finalResponse);
+                agentSessionService.markAsClarifying(sessionId, waitingFor);
+                sessionContext.setPendingClarificationFor(waitingFor);
+
+                sessionContext.getConversationMessages().add(
+                        ConversationMessage.builder()
+                                .role("assistant")
+                                .content(finalResponse)
+                                .build()
+                );
+
+                agentSessionService.saveMessage(
+                        session,
+                        MessageRole.ASSISTANT,
+                        finalResponse,
+                        null,
+                        null,
+                        null
+                );
+
+                break;
+            }
+
+            // Unexpected stop reason - break safely
+            log.warn("Unexpected stop_reason={} for sessionId={}", stopReason, sessionId);
+            finalResponse = "I encountered an issue. Could you please try again?";
+            break;
         }
+
+        if(finalResponse == null) {
+            finalResponse = "I've been thinking too long. Could you please rephrase your request?";
+            log.warn("Hit MAX_TOOL_LOOPS for sessionId={}", sessionId);
+        }
+
+
+        // Step 5: Update Redis context
+        sessionContextService.save(sessionContext);
+
+
+        // Step 6: Update session status in postgres
+        SessionStatus currentStatus = session.getStatus();
+        if(currentStatus == SessionStatus.CLARIFYING && sessionContext.getPendingClarificationFor() == null) {
+            // Clarification was resolved — back to ACTIVE
+            agentSessionService.updateSessionStatus(sessionId, SessionStatus.ACTIVE);
+            currentStatus = SessionStatus.ACTIVE;
+        }
+
+
+        // Step 7: Build and return ChatResponse
+        return ChatResponse.builder()
+                .sessionId(sessionId)
+                .message(finalResponse)
+                .sessionStatus(currentStatus)
+                .clarificationNeeded(sessionContext.getPendingClarificationFor())
+                .quickReplies(buildQuickReplies(sessionContext.getPendingClarificationFor(), finalResponse))
+                .toolCallsMade(toolCallSummaries)
+                .actionSummary(buildActionSummary(toolCallSummaries))
+                .build();
 
     }
 
@@ -253,6 +319,7 @@ public class AgentChatService {
         }
     }
 
+
     private List<Object> buildMessagesForApi(List<ConversationMessage> history) {
         List<Object> messages = new ArrayList<>();
 
@@ -273,6 +340,7 @@ public class AgentChatService {
 
         return messages;
     }
+
 
     // Resolve session - find existing session by using sessionId and userId
     private AgentSession resolveSession(Long userId, UUID sessionId) {
@@ -298,6 +366,7 @@ public class AgentChatService {
                         .orElseThrow(() -> new AgentException("Failed to create session")))
                 .orElseThrow(() -> new AgentException("Failed to create session"));
     }
+
 
     // Redis context has expired - rebuild from postgres message history
     private SessionContext rebuildContextFromPostgres(AgentSession session, Long userId) {
@@ -387,6 +456,58 @@ public class AgentChatService {
         }
     }
 
+    private String detectClarificationTopic(String agentMessage) {
+        String lower = agentMessage.toLowerCase();
+        if(lower.contains("color") || lower.contains("colour"))      return "COLOR";
+        if(lower.contains("size"))                                   return "SIZE";
+        if(lower.contains("address") || lower.contains("deliver"))   return "ADDRESS";
+        if(lower.contains("confirm") || lower.contains("proceed"))   return "CONFIRM_ORDER";
+        if(lower.contains("quantity") || lower.contains("how many")) return "QUANTITY";
+
+        return "GENERAL";
+    }
+
+    private List<String> buildQuickReplies(String clarificationTopic, String agentMessage) {
+        if(clarificationTopic == null) return null;
+        return switch (clarificationTopic) {
+            case "CONFIRM_ORDER" -> List.of("Yes, confirm order", "No cancel");
+            case "COLOR"         -> List.of("Black", "white", "Silver", "Other");
+            case "SIZE"          -> List.of("Small", "Medium", "Large", "XL");
+            case "QUANTITY"      -> List.of("1", "2", "3");
+            case "ADDRESS"       -> List.of("Use saved address", "Add new address");
+            default              -> null;
+        };
+    }
+
+    private ActionSummary buildActionSummary(List<ToolCallSummary> toolCalls) {
+        if(toolCalls.isEmpty()) return null;
+
+        // Find the most significant action in this turn
+        for(ToolCallSummary tool : toolCalls) {
+            if("SUCCESS".equals(tool.getStatus())) {
+                return switch (tool.getToolName()) {
+                    case "placeOrder", "buyNow" -> ActionSummary.builder()
+                            .actionType("ORDER_PLACED")
+                            .details("Your order has been placed successfully")
+                            .build();
+
+                    case "initiatePayment" -> ActionSummary.builder()
+                            .actionType("PAYMENT_INITIATED")
+                            .details("Payment initiated. Please complete the payment.")
+                            .build();
+
+                    case "addToCart" -> ActionSummary.builder()
+                            .actionType("ADD_TO_CART")
+                            .details("Item added to your cart")
+                            .build();
+
+                    default -> null;
+                };
+            }
+        }
+        return null;
+    }
+
     private String buildToolDescription(String toolName, String result, boolean failed) {
         if (failed) return "Failed: " + toolName;
         return switch (toolName) {
@@ -410,6 +531,7 @@ public class AgentChatService {
                 toolInput
         );
     }
+
     private String buildToolResultContent(String toolUseId, String toolResult) {
         return String.format(
                 "[{\"type\":\"tool_result\", \"tool_use_id\":\"%s\", \"content\":\"%s\"}]",

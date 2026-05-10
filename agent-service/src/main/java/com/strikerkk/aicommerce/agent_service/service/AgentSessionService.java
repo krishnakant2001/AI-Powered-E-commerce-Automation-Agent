@@ -302,6 +302,16 @@ public class AgentSessionService {
         };
     }
 
+    public void markAsClarifying(UUID sessionId, String waitingFor) {
+        updateSessionStatus(sessionId, SessionStatus.CLARIFYING);
+
+        // Also update Redis context so we know what we are waiting for
+        sessionContextService.findBySessionId(sessionId).ifPresent(context -> {
+            context.setPendingClarificationFor(waitingFor);
+            sessionContextService.save(context);
+        });
+    }
+
     @Transactional
     public AgentMessage saveMessage(AgentSession session, MessageRole role, String content,
                                    String toolName, String toolInput, String toolOutput) {
@@ -345,4 +355,14 @@ public class AgentSessionService {
             agentActionRepository.save(action);
         });
     }
+
+    @Transactional
+    public void updateSessionStatus(UUID sessionId, SessionStatus sessionStatus) {
+        agentSessionRepository.findById(sessionId).ifPresent(session -> {
+            session.setStatus(sessionStatus);
+
+            agentSessionRepository.save(session);
+        });
+    }
+
 }
