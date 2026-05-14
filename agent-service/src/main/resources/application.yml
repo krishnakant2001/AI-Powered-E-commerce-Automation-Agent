@@ -1,0 +1,22 @@
+resilience4j:
+  retry:
+    instances:
+      microservice-call:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exception:
+          - feign.FeignException
+          - java.io.IOException
+
+      llm-call:
+        max-attempts: 2
+        wait-duration: 2s
+
+  circuitbreaker:
+    instances:
+      microservice-call:
+        sliding-window-size: 10
+        failure-rate-threshold: 50          #open circuit if 50% of calls fail
+        wait-duration-in-open-state: 30s    #stay open for 30s then go half-open
+        permitted-number-of-calls-in-half-open-state: 3
+        register-health-indictor: true

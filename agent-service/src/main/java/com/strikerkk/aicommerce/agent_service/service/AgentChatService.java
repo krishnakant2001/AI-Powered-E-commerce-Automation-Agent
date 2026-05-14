@@ -23,6 +23,7 @@ import com.strikerkk.aicommerce.agent_service.model.SessionContext;
 import com.strikerkk.aicommerce.agent_service.repository.AgentSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -44,13 +45,21 @@ public class AgentChatService {
     private final ToolExecutionService toolExecutionService;
     private final ObjectMapper objectMapper;
 
+    @Value("${anthropic.api.key}")
     private String llmKey;
+
+    @Value("${anthropic.api.model}")
     private String model;
-    private String maxTokens;
 
+    @Value("${anthropic.api.max-tokens}")
+    private int maxTokens;
+
+    @Value("${anthropic.url}")
+    private String LLL_URL;
+
+
+    // Max tool call loops per turn — prevents infinite loops
     private static final int MAX_TOOL_CALLS = 10;
-
-    private static final String LLL_URL = "";
 
     public ChatResponse chat(ChatRequest request) {
 
@@ -87,7 +96,7 @@ public class AgentChatService {
             loopCount++;
             log.info("LLM loop iteration {} for sessionId={}", loopCount, sessionId);
 
-            // Call API
+            // Call Claude API
             String llmResponseRaw = callLlmApi(sessionContext.getConversationMessages());
             JsonNode llmResponse = parseJson(llmResponseRaw);
 
@@ -275,7 +284,7 @@ public class AgentChatService {
     }
 
     // ——————————————————————————————————
-    // Call LLM API
+    // Call CLAUDE API
     // ——————————————————————————————————
 
     private String callLlmApi(List<ConversationMessage> history) {
@@ -299,7 +308,7 @@ public class AgentChatService {
                     .uri(URI.create(LLL_URL))
                     .header("Content-Type", "application/json")
                     .header("x-api-key", llmKey)
-                    .header("llm-version", "2023-06-01")
+                    .header("anthropic-version", "2023-06-01")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 

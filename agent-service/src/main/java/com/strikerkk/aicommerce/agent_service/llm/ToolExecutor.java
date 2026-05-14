@@ -1,6 +1,8 @@
 package com.strikerkk.aicommerce.agent_service.llm;
 
 import com.strikerkk.aicommerce.agent_service.clients.*;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,16 +22,22 @@ public class ToolExecutor {
     // Product Tools
     // ——————————————————————————————————
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "searchProductsFallback")
     public String searchProducts(String search, String category) {
         log.info("Tool: searchProducts search={} category={}", search, category);
         return productServiceClient.getAllProducts(search, category, 0, 10);
     }
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "getProductDetailsFallback")
     public String getProductDetails(Long productId) {
         log.info("Tool: getProductDetails productId={}", productId);
         return productServiceClient.getProductDetails(productId);
     }
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "getProductItemDetailsFallback")
     public String getProductItemDetails(Long productId, Long variantId) {
         log.info("Tool: getProductItemDetails with variant productId={} variantId={}", productId, variantId);
         return productServiceClient.getProductItemDetails(productId, variantId);
@@ -40,16 +48,22 @@ public class ToolExecutor {
     // Cart Tools
     // ——————————————————————————————————
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "getCartFallback")
     public String getCart() {
         log.info("Tool: getCartItems");
         return cartServiceClient.allCartItems();
     }
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "addToCartFallback")
     public String addToCart(String requestBody) {
         log.info("Tool: addToCart body={}", requestBody);
         return cartServiceClient.addItemToCart(requestBody);
     }
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "clearCartFallback")
     public String clearCart() {
         log.info("Tool: clearCart");
         return cartServiceClient.clearCart();
@@ -60,24 +74,39 @@ public class ToolExecutor {
     // Order Tools
     // ——————————————————————————————————
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "placeOrderFallback")
     public String placeOrder(String requestBody) {
         log.info("Tool: placeOrder body={}", requestBody);
         return orderServiceClient.placeOrder(requestBody);
     }
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "buyNowFallback")
     public String buyNow(String requestBody) {
         log.info("Tool: buyNow body={}", requestBody);
         return orderServiceClient.buyNow(requestBody);
     }
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "getOrderFallback")
     public String getOrder(Long orderId) {
         log.info("Tool: getOrder order={}", orderId);
         return orderServiceClient.getOrderById(orderId);
     }
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "getMyOrdersFallback")
     public String getMyOrders() {
         log.info("Tool: getMyOrders");
         return orderServiceClient.getMyOrders();
+    }
+
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "getOrderItemsFallback")
+    public String getOrderItems(Long orderId) {
+        log.info("Tool: getOrderItems");
+        return  orderServiceClient.getOrderItems(orderId);
     }
 
 
@@ -85,6 +114,8 @@ public class ToolExecutor {
     // Payment Tools
     // ——————————————————————————————————
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "initiatePaymentFallback")
     public String initiatePayment(String requestBody) {
         log.info("Tool: initiatePayment body={}", requestBody);
         return paymentServiceClient.initiatePayment(requestBody);
@@ -95,6 +126,8 @@ public class ToolExecutor {
     // User / Address Tools
     // ——————————————————————————————————
 
+    @Retry(name = "microservice-call")
+    @CircuitBreaker(name = "microservice-call", fallbackMethod = "getAllAddressesFallback")
     public String getAllAddresses() {
         log.info("Tool: getAllAddresses");
         return userServiceClient.getAllAddresses();
@@ -163,6 +196,12 @@ public class ToolExecutor {
         log.error("getMyOrders fallback triggered: {}", ex.getMessage());
         return buildErrorJson("getMyOrders",
                 "Unable to fetch your orders right now. Please try again.");
+    };
+
+    public String getOrderItemsFallback(Exception ex) {
+        log.error("getOrderItems fallback triggered: {}", ex.getMessage());
+        return buildErrorJson("getMyOrders",
+                "Unable to fetch your order items right now. Please try again.");
     };
 
     public String initiatePaymentFallback(String requestBody, Exception ex) {

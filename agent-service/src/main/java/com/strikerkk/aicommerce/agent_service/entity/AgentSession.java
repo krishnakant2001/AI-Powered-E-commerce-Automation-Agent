@@ -33,7 +33,7 @@ public class AgentSession {
     @Builder.Default
     private SessionStatus status = SessionStatus.ACTIVE;
 
-    @Column(name = "initialIntent", nullable = false)
+    @Column(name = "initial_intent", columnDefinition = "TEXT")
     private String initialIntent;
 
     @CreationTimestamp

@@ -4,6 +4,7 @@ import com.strikerkk.aicommerce.agent_service.common.ApiResponse;
 import com.strikerkk.aicommerce.agent_service.dto.request.ChatRequest;
 import com.strikerkk.aicommerce.agent_service.dto.request.StartSessionRequest;
 import com.strikerkk.aicommerce.agent_service.dto.response.*;
+import com.strikerkk.aicommerce.agent_service.service.AgentChatService;
 import com.strikerkk.aicommerce.agent_service.service.AgentSessionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,16 @@ import java.util.UUID;
 public class AgentController {
 
     private final AgentSessionService agentSessionService;
+    private final AgentChatService agentChatService;
 
     @PostMapping("/chat")
     ResponseEntity<ApiResponse<ChatResponse>> chat(@Valid @RequestBody ChatRequest request) {
+
+        ChatResponse response = agentChatService.chat(request);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Chat processed"));
+                .body(ApiResponse.success("Chat processed", response));
     }
 
     @PostMapping("/session/start")
