@@ -1,14 +1,7 @@
-spring:
-  kafka:
-    bootstrap-servers: localhost:9092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.LongSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
 resilience4j:
   retry:
     instances:
-      order-service-call:
+      product-service-call:
         max-attempts: 3
         wait-duration: 500ms
         retry-exceptions:
@@ -17,7 +10,7 @@ resilience4j:
 
   circuitbreaker:
     instances:
-      order-service-call:
+      product-service-call:
         sliding-window-size: 10
         failure-rate-threshold: 50
         wait-duration-in-open-state: 30s

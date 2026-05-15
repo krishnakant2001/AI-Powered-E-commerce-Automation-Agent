@@ -4,7 +4,7 @@ resilience4j:
       microservice-call:
         max-attempts: 3
         wait-duration: 500ms
-        retry-exception:
+        retry-exceptions:
           - feign.FeignException
           - java.io.IOException
 
@@ -19,4 +19,4 @@ resilience4j:
         failure-rate-threshold: 50          #open circuit if 50% of calls fail
         wait-duration-in-open-state: 30s    #stay open for 30s then go half-open
         permitted-number-of-calls-in-half-open-state: 3
-        register-health-indictor: true
+        register-health-indicator: true

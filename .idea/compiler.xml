@@ -10,7 +10,7 @@
         <module name="cart-service" />
         <module name="discovery-server" />
       </profile>
-      <profile name="Annotation profile for agent-service" enabled="true">
+      <profile name="Annotation profile for payment-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -19,8 +19,8 @@
         </processorPath>
         <module name="api-gateway" />
         <module name="product-service" />
-        <module name="order-service" />
         <module name="payment-service" />
+        <module name="order-service" />
         <module name="user-service" />
         <module name="agent-service" />
       </profile>

@@ -1,7 +1,6 @@
 package com.strikerkk.aicommerce.cart_service.service;
 
 import com.strikerkk.aicommerce.cart_service.auth.UserContext;
-import com.strikerkk.aicommerce.cart_service.clients.ProductClient;
 import com.strikerkk.aicommerce.cart_service.dto.request.AddCartItemRequest;
 import com.strikerkk.aicommerce.cart_service.dto.request.UpdateCartItemRequest;
 import com.strikerkk.aicommerce.cart_service.dto.response.CartItemResponse;
@@ -33,7 +32,7 @@ public class CartService {
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
-    private final ProductClient productClient;
+    private final CartResilience4j cartResilience4j;
     private final ModelMapper modelMapper;
 
     public CartResponse allCartItems() {
@@ -61,7 +60,7 @@ public class CartService {
             updateExistingItem(existingItemOpt.get(), request.getQuantity());
         }
         else {
-            ProductCartResponse response = productClient.getProductItemDetails(request.getProductId(), request.getVariantId());
+            ProductCartResponse response = cartResilience4j.getItemDetails(request.getProductId(), request.getVariantId());
 
             log.info("Adding new item into the cart");
 
@@ -168,7 +167,7 @@ public class CartService {
         log.info("Syncing cart items with latest product data");
 
         for(CartItem item : cart.getCartItems()) {
-            ProductCartResponse response = productClient.getProductItemDetails(item.getProductId(), item.getVariantId());
+            ProductCartResponse response = cartResilience4j.getItemDetails(item.getProductId(), item.getVariantId());
 
             if(!response.getIsAvailable()) {
                 cartItemRepository.delete(item);

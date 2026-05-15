@@ -2,7 +2,6 @@ package com.strikerkk.aicommerce.order_service.service;
 
 import com.strikerkk.aicommerce.order_service.auth.UserContext;
 import com.strikerkk.aicommerce.order_service.clients.CartClient;
-import com.strikerkk.aicommerce.order_service.clients.ProductClient;
 import com.strikerkk.aicommerce.order_service.clients.UserClient;
 import com.strikerkk.aicommerce.order_service.dto.ClientResponse.AddressResponse;
 import com.strikerkk.aicommerce.order_service.dto.ClientResponse.CartItemResponse;
@@ -33,7 +32,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CartClient cartClient;
     private final UserClient userClient;
-    private final ProductClient productClient;
+    private final OrderResilience4j orderResilience4j;
     private final ModelMapper modelMapper;
 
     @Transactional
@@ -117,7 +116,7 @@ public class OrderService {
             throw new RuntimeException("User is not matching with auth userId");
         }
 
-        ProductItemResponse itemResponse = productClient.getProductItemDetails(request.getProductId(), request.getVariantId());
+        ProductItemResponse itemResponse = orderResilience4j.getItemDetails(request.getProductId(), request.getVariantId());
         AddressResponse address = userClient.getAddressByAddressId(request.getAddressId());
 
         log.info("Buying now item order by userId={}", userId);

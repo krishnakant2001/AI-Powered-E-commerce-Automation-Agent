@@ -7,7 +7,6 @@ import com.strikerkk.aicommerce.payment_service.dto.response.RefundResponse;
 import com.strikerkk.aicommerce.payment_service.entity.Refund;
 import com.strikerkk.aicommerce.payment_service.payment.VerifySignature;
 import com.strikerkk.aicommerce.payment_service.auth.UserContext;
-import com.strikerkk.aicommerce.payment_service.clients.OrderClient;
 import com.strikerkk.aicommerce.payment_service.dto.clientResponse.OrderResponse;
 import com.strikerkk.aicommerce.payment_service.dto.clientResponse.OrderStatus;
 import com.strikerkk.aicommerce.payment_service.dto.request.InitiatePaymentRequest;
@@ -39,7 +38,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final RefundRepository refundRepository;
-    private final OrderClient orderClient;
+    private final PaymentResilience4j paymentResilience4j;
     private final RazorpayClient razorpayClient;
     private final VerifySignature verifySignature;
     private final ModelMapper modelMapper;
@@ -51,7 +50,8 @@ public class PaymentService {
     public InitiatePaymentResponse initiatePayment(InitiatePaymentRequest request) {
         Long userId = Long.valueOf(UserContext.getUserId());
 
-        OrderResponse orderResponse = orderClient.getOrderById(request.getOrderId()).getBody().getData();
+        // Call method to get the order response from order service
+        OrderResponse orderResponse = paymentResilience4j.getOrderById(request.getOrderId());
 
         if(!orderResponse.getUserId().equals(userId)) {
             throw new UnauthorizedException("Order does not belong to this user");
