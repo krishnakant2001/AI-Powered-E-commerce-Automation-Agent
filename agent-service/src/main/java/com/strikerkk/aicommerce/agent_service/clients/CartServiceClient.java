@@ -10,7 +10,7 @@ public interface CartServiceClient {
     @GetMapping("")
     String allCartItems();
 
-    @PostMapping("/items")
+    @PostMapping(value = "/items", consumes = "application/json")
     String addItemToCart(@RequestBody String requestBody);
 
     @PatchMapping("/items/{cartItemId}")

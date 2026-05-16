@@ -101,7 +101,7 @@ public class ToolDefinitionBuilder {
             {
                 put("name", name);
                 put("description", description);
-                put("input schema", new HashMap<String, Object>(){
+                put("input_schema", new HashMap<String, Object>(){
                     {
                         put("type", "object");
                         put("properties", schema);

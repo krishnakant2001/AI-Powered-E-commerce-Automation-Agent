@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "order-service", path = "/orders")
 public interface OrderServiceClient {
 
-    @PostMapping("")
+    @PostMapping(value = "", consumes = "application/json")
     String placeOrder(@RequestBody String requestBody);
 
     @PostMapping("/buy-now")

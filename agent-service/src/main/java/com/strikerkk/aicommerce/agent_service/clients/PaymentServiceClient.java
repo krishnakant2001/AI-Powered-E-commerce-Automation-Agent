@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "payment-service", path = "/payments")
 public interface PaymentServiceClient {
 
-    @PostMapping("/initiate")
+    @PostMapping(value = "/initiate", consumes = "application/json")
     String initiatePayment(@RequestBody String requestBody);
 
 

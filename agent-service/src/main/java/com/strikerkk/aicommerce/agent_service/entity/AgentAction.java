@@ -48,7 +48,7 @@ public class AgentAction {
     @Builder.Default
     private ActionStatus status = ActionStatus.PENDING;
 
-    @Column(name = "failure_reason", nullable = false)
+    @Column(name = "failure_reason")
     private String failureReason;
 
     @Column(name = "resource_id")
