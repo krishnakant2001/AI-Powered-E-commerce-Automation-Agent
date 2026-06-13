@@ -1,4 +1,10 @@
-server.port: 8080
+# The API Gateway is the ONLY externally exposed service.
+# Bind to all interfaces (0.0.0.0) so external clients can reach it on port 8080.
+# Every other service binds to 127.0.0.1 (loopback) and is only reachable through this gateway.
+server:
+  port: 8080
+  address: 0.0.0.0
+
 jwt.secretKey: ${JWT_SECRET_KEY}
 
 #api-gateway-config
@@ -32,7 +38,6 @@ spring:
           filters:
             - StripPrefix=2
             - AuthenticationFilter
-#            - RewritePath=/api/v1/(?<segment>.*), /${segment}
 
         - id: cart-service
           uri: lb://CART-SERVICE
