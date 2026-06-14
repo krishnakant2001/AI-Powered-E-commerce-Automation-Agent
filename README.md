@@ -94,6 +94,8 @@ All through a single chat API call — no UI needed. The backend is a full micro
 
 ---
 
+![System Architecture](docs/agent-demo/system-architecture.png)
+
 ## 📦 Microservices Breakdown
 
 ### 1. 🔍 Discovery Server
@@ -248,6 +250,142 @@ Return ChatResponse with action summaries + quick replies
 - Microservice Feign calls: 3 retries with 500ms backoff
 - Circuit Breaker: 50% failure threshold, 30s open window
 
+---
+
+## 🎬 Agent in Action — End-to-End Demo
+
+> A real Postman walkthrough showing one complete shopping session powered by the Claude tool-use loop. All 15 steps run through a single `POST /api/v1/agent/chat` endpoint — no UI, just conversational AI orchestrating microservices autonomously.
+ 
+---
+
+### Step 1 — Session Initiated, Agent Greets the User
+> **User:** "Hey, How are you, I'm your customer."  
+> Claude responds naturally and presents its capabilities. No tools called — pure LLM response. Session created in Redis + PostgreSQL.
+
+![Step 1](docs/agent-demo/01-session-initiated-greeting.png)
+ 
+---
+
+### Step 2 — Agent Calls `searchProducts` (Boat Speaker)
+> **User:** "Yeah, I want to add the Bluetooth speaker of Boat into my cart."  
+> Claude calls `searchProducts` → no Boat brand found → honestly tells the user, suggests JBL alternatives with variants and stock.  
+> **Tool:** `searchProducts` ✅
+
+![Step 2](docs/agent-demo/02-search-boat-speaker-tool-call.png)
+ 
+---
+
+### Step 3 — `addToCart` Fails — Agent Handles Gracefully
+> **User:** "Add JBL speaker of color black in my cart."  
+> Claude calls `addToCart` → tool returns FAILED → agent doesn't crash. It explains the issue and offers alternatives (retry, buy now, check cart).  
+> **Tool:** `addToCart` ❌ — Resilience in action
+
+![Step 3](docs/agent-demo/03-add-to-cart-failed-resilience.png)
+ 
+---
+
+### Step 4 — User Retries, `addToCart` Succeeds
+> **User:** "Add JBL speaker of color black in my cart, try again."  
+> Claude retries `addToCart` → SUCCESS. Returns cart summary with item, price, and next action suggestions.  
+> **Tool:** `addToCart` ✅ | **actionSummary:** `ADD_TO_CART`
+
+![Step 4](docs/agent-demo/04-add-jbl-black-to-cart-success.png)
+ 
+---
+
+### Step 5 — Agent Calls `searchProducts` (Men's Wallet)
+> **User:** "Now I want men wallet as well, can you add this into my cart."  
+> Claude calls `searchProducts` → finds Fossil Leather Wallet → returns variants with stock status (in stock ✅, low stock ⚠️, out of stock ❌).  
+> **Tool:** `searchProducts` ✅
+
+![Step 5](docs/agent-demo/05-search-mens-wallet-tool-call.png)
+ 
+---
+
+### Step 6 — `addToCart` + Cart Summary in One Turn
+> **User:** "Add brown and show me the cart details."  
+> Claude calls `addToCart` for wallet (Small - Brown) → then returns full cart: 2 items, ₹5,048.00 total.  
+> **Tool:** `addToCart` ✅ | **actionSummary:** `ADD_TO_CART`
+
+![Step 6](docs/agent-demo/06-add-wallet-brown-cart-summary.png)
+ 
+---
+
+### Step 7 — Checkout Triggers `getAllAddresses` Tool Call
+> **User:** "Now please proceed and checkout."  
+> Claude autonomously calls `getAllAddresses` → fetches saved delivery addresses → asks user to confirm which one to use before placing the order.  
+> **Tool:** `getAllAddresses` ✅
+
+![Step 7](docs/agent-demo/07-checkout-fetch-addresses-tool-call.png)
+ 
+---
+
+### Step 8 — `placeOrder` Succeeds — Order #32 Created
+> **User:** "Go with default address."  
+> Claude calls `placeOrder` with the default address → Order #32 placed, status PENDING (Payment Required). Prompts user to initiate payment.  
+> **Tool:** `placeOrder` ✅ | **actionSummary:** `ORDER_PLACED`
+
+![Step 8](docs/agent-demo/08-place-order-success.png)
+ 
+---
+
+### Step 9 — `initiatePayment` Fails — Circuit Breaker Triggered
+> **User:** "Yes proceed with payment."  
+> Claude calls `initiatePayment` → payment service temporarily unavailable → agent informs user, reassures order is saved, offers retry options.  
+> **Tool:** `initiatePayment` ❌ — Circuit Breaker triggered
+
+![Step 9](docs/agent-demo/09-initiate-payment-failed-resilience.png)
+ 
+---
+
+### Step 10 — Retry Still Fails — Agent Stays Calm
+> **User:** "Yes proceed with payment, try again."  
+> Second attempt also fails → agent keeps the user informed, confirms order is safe and items are reserved, suggests trying later.  
+> **Tool:** `initiatePayment` ❌
+
+![Step 10](docs/agent-demo/10-initiate-payment-retry-failed.png)
+ 
+---
+
+### Step 11 — User Checks Pending Orders via `getMyOrders`
+> **User:** "Wait show my pending orders."  
+> Claude calls `getMyOrders` → returns all PENDING orders with amounts and dates. Order #32 appears at the top.  
+> **Tool:** `getMyOrders` ✅
+
+![Step 11](docs/agent-demo/11-show-pending-orders-tool-call.png)
+ 
+---
+
+### Step 12 — `initiatePayment` Succeeds — Razorpay Link Generated
+> **User:** "Can you please proceed payment for recent order."  
+> Claude calls `initiatePayment` for Order #32 → SUCCESS. Returns Razorpay Payment ID, Gateway Order ID, and payment URL.  
+> **Tool:** `initiatePayment` ✅ | **actionSummary:** `PAYMENT_INITIATED`
+
+![Step 12](docs/agent-demo/12-initiate-payment-success-razorpay.png)
+ 
+---
+
+### Step 13 — Razorpay Payment Page Opens
+> Agent-generated payment link opens in the browser. Shows Order ID: 32, Amount: ₹5,048.00, and a "Pay Now" button.
+
+![Step 13](docs/agent-demo/13-razorpay-payment-page.png)
+ 
+---
+
+### Step 14 — Razorpay Checkout Modal (Test Mode)
+> Razorpay's native checkout UI opens with UPI, Cards, EMI, and Netbanking options. Test card used to simulate payment — OTP being sent.
+
+![Step 14](docs/agent-demo/14-razorpay-checkout-modal.png)
+ 
+---
+
+### Step 15 — Order Confirmed ✅
+> **User:** "Now show me confirmed orders."  
+> Claude calls `getMyOrders` → Order #32 status is now **CONFIRMED** 🎉. Full order breakdown with delivery address and items shown.  
+> **Tool:** `getMyOrders` ✅
+
+![Step 15](docs/agent-demo/15-confirmed-order-status.png)
+ 
 ---
 
 ## 🛠 Tech Stack
