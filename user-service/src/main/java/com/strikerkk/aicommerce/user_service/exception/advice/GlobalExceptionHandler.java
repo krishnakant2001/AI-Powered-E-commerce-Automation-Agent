@@ -6,13 +6,13 @@ import com.strikerkk.aicommerce.user_service.exception.BadRequestException;
 import com.strikerkk.aicommerce.user_service.exception.ResourceNotFoundException;
 import com.strikerkk.aicommerce.user_service.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -65,12 +65,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage() + ", Request conflicts with existing data"));
+    }
 
     // Catch all errors
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneral(RuntimeException ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(!ex.getMessage().isEmpty() ? ex.getMessage() : "Something went wrong!"));
+                .body(ApiResponse.error(!ex.getMessage().isBlank() ? ex.getMessage() : "Something went wrong!"));
     }
 }

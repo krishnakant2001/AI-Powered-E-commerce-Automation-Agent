@@ -1,6 +1,7 @@
 package com.strikerkk.aicommerce.user_service.controller;
 
 import com.strikerkk.aicommerce.user_service.common.ApiResponse;
+import com.strikerkk.aicommerce.user_service.common.PageResponse;
 import com.strikerkk.aicommerce.user_service.dto.request.CreateUserRequest;
 import com.strikerkk.aicommerce.user_service.dto.request.LoginUserRequest;
 import com.strikerkk.aicommerce.user_service.dto.request.UpdateUserDetailsRequest;
@@ -9,6 +10,8 @@ import com.strikerkk.aicommerce.user_service.dto.response.UserResponse;
 import com.strikerkk.aicommerce.user_service.service.AuthService;
 import com.strikerkk.aicommerce.user_service.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +58,7 @@ public class AuthController {
     }
 
     @PutMapping("/update/user/details")
-    public ResponseEntity<ApiResponse<UserResponse>> updateUserDetails(@RequestBody UpdateUserDetailsRequest request) {
+    public ResponseEntity<ApiResponse<UserResponse>> updateUserDetails(@Valid @RequestBody UpdateUserDetailsRequest request) {
 
         UserResponse userResponse = userService.updateUserDetails(request);
 
@@ -66,13 +69,15 @@ public class AuthController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/all/user/details")
-    public ResponseEntity<ApiResponse<List<UserResponse>>> allUserDetails() {
+    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> allUserDetails(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
 
-        List<UserResponse> userResponseList = userService.allUserDetails();
+        PageResponse<UserResponse> userResponseList = userService.allUserDetails(page, size);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Successfully fetch all user details",userResponseList));
+                .body(ApiResponse.success("Successfully fetched all user details",userResponseList));
 
     }
 
