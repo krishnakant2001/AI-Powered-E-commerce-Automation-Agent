@@ -27,4 +27,6 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
         WHERE a.user.id = :userId AND a.id != :addressId
     """)
     void resetOtherAddresses(Long userId, Long addressId);
+
+    boolean existsByUserId(Long userId);
 }
