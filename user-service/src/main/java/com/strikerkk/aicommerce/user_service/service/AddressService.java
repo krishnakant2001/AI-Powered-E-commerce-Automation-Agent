@@ -12,18 +12,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AddressService {
 
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
     private final ModelMapper modelMapper;
 
+    @Transactional
     public AddressResponse addAddress(AddressRequest request) {
 
         Long userId = Long.valueOf(UserContext.getUserId());
@@ -34,7 +37,7 @@ public class AddressService {
         log.info("Adding new address for userId={}", userId);
 
         // Check if any address found for this user
-        boolean firstAddress = addressRepository.findAllByUserId(userId).isEmpty();
+        boolean firstAddress = !addressRepository.existsByUserId(userId);
 
         // Adding new address
         Address newAddress = Address.builder()
@@ -79,7 +82,7 @@ public class AddressService {
                 .toList();
     }
 
-
+    @Transactional
     public AddressResponse updateAddress(AddressRequest request, Long addressId) {
 
         String userId = UserContext.getUserId();
@@ -110,7 +113,7 @@ public class AddressService {
         return modelMapper.map(updatedAddress, AddressResponse.class);
     }
 
-
+    @Transactional
     public void deleteAddress(Long addressId) {
 
         String userId = UserContext.getUserId();
