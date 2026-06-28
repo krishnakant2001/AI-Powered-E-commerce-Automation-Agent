@@ -9,6 +9,7 @@ import com.strikerkk.aicommerce.product_service.repository.ProductVariantReposit
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -17,6 +18,7 @@ public class ProductCartService {
 
     private final ProductVariantRepository variantRepository;
 
+    @Transactional(readOnly = true)
     public ProductItemResponse getProductItemDetails(Long productId, Long variantId) {
 
         log.info("Getting product details with productId={} and variantId={}", productId, variantId);
@@ -26,25 +28,23 @@ public class ProductCartService {
 
         Product product = productVariant.getProduct();
 
-        ProductItemResponse productItemResponse = new ProductItemResponse();
-
-        productItemResponse.setProductId(product.getId());
-        productItemResponse.setProductName(product.getName());
-        productItemResponse.setBrandName(product.getBrand());
-        productItemResponse.setPrice(productVariant.getPriceOverride());
-        productItemResponse.setIsAvailable(product.getIsAvailable());
-
-        productItemResponse.setVariantId(productVariant.getId());
-        productItemResponse.setSize(productVariant.getSize());
-        productItemResponse.setColor(productVariant.getColor());
-        productItemResponse.setInStock(productVariant.getStockCount() > 0);
-
-
-        product.getImages().stream()
+        String primaryImageUrl = product.getImages().stream()
                 .filter(ProductImage::getIsPrimary)
                 .findFirst()
-                .ifPresent(img -> productItemResponse.setImageUrl(img.getUrl()));
+                .map(ProductImage::getUrl)
+                .orElse(null);
 
-        return productItemResponse;
+        return ProductItemResponse.builder()
+                .productId(product.getId())
+                .productName(product.getName())
+                .brandName(product.getBrand())
+                .price(productVariant.getPriceOverride())
+                .isAvailable(product.getIsAvailable())
+                .variantId(productVariant.getId())
+                .size(productVariant.getSize())
+                .color(productVariant.getColor())
+                .inStock(productVariant.getStockCount() > 0)
+                .imageUrl(primaryImageUrl)
+                .build();
     }
 }

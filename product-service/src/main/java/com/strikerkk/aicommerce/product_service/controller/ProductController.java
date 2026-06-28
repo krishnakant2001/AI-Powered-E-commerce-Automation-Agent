@@ -1,11 +1,15 @@
 package com.strikerkk.aicommerce.product_service.controller;
 
 import com.strikerkk.aicommerce.product_service.common.ApiResponse;
+import com.strikerkk.aicommerce.product_service.common.PageResponse;
 import com.strikerkk.aicommerce.product_service.dto.clientResponse.ProductItemResponse;
 import com.strikerkk.aicommerce.product_service.dto.response.ProductResponse;
 import com.strikerkk.aicommerce.product_service.service.ProductCartService;
 import com.strikerkk.aicommerce.product_service.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.query.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +25,10 @@ public class ProductController {
     private final ProductCartService productCartService;
 
     @GetMapping("/all")
-    ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts() {
+    ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getAllProducts(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
 
-        List<ProductResponse> productResponseList = productService.getAllProducts();
+        PageResponse<ProductResponse> productResponseList = productService.getAllProducts(pageable);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success("Successfully fetch all products", productResponseList));
