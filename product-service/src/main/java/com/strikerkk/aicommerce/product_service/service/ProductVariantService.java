@@ -6,13 +6,14 @@ import com.strikerkk.aicommerce.product_service.dto.response.ProductVariantRespo
 import com.strikerkk.aicommerce.product_service.entity.Product;
 import com.strikerkk.aicommerce.product_service.entity.ProductVariant;
 import com.strikerkk.aicommerce.product_service.exception.ResourceNotFoundException;
-import com.strikerkk.aicommerce.product_service.exception.UnauthorizedException;
+import com.strikerkk.aicommerce.product_service.helper.ProductOwnershipValidator;
 import com.strikerkk.aicommerce.product_service.repository.ProductRepository;
 import com.strikerkk.aicommerce.product_service.repository.ProductVariantRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -22,13 +23,18 @@ public class ProductVariantService {
 
     private final ProductVariantRepository productVariantRepository;
     private final ProductRepository productRepository;
+    private final ProductOwnershipValidator productOwnershipValidator;
     private final ModelMapper modelMapper;
 
+    @Transactional
     public ProductVariantResponse createProductVariant(ProductVariantRequest request, Long productId) {
 
         // Check if product exists
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        // Authorization check
+        productOwnershipValidator.validate(product);
 
         // Create Product Variant
         ProductVariant productVariant = ProductVariant.builder()
@@ -44,13 +50,10 @@ public class ProductVariantService {
         log.info("Create product variant for product_id={}", productId);
 
         return modelMapper.map(savedProductVariant, ProductVariantResponse.class);
-
     }
 
-
+    @Transactional
     public ProductVariantResponse updateProductVariant(ProductVariantRequest request, Long productId, Long variantId) {
-
-        String userId = UserContext.getUserId();
 
         // Check if product exists
         Product product = productRepository.findById(productId)
@@ -61,9 +64,7 @@ public class ProductVariantService {
                 .orElseThrow(() -> new ResourceNotFoundException("Variant not found for this product"));
 
         // Authorization check
-        if (!product.getCreatedBy().equals(userId)) {
-            throw new UnauthorizedException("You are not allowed to update this variant");
-        }
+        productOwnershipValidator.validate(product);
 
         // Update fields
         productVariant.setSize(request.getSize());
@@ -78,19 +79,15 @@ public class ProductVariantService {
         return modelMapper.map(updatedVariant, ProductVariantResponse.class);
     }
 
-
+    @Transactional
     public void deleteProductVariant(Long productId, Long variantId) {
-
-        String userId = UserContext.getUserId();
 
         // Check if product exists
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         // Authorization check
-        if (!product.getCreatedBy().equals(userId)) {
-            throw new UnauthorizedException("You are not allowed to delete this variant");
-        }
+        productOwnershipValidator.validate(product);
 
         // Check if variant belongs to that product
         ProductVariant productVariant = productVariantRepository.findByIdAndProductId(variantId, productId)
