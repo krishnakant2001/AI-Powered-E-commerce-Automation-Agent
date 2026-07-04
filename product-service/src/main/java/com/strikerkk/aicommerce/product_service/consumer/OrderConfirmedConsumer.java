@@ -11,6 +11,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +19,7 @@ import java.util.Set;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class OrderConfimedConsumer {
+public class OrderConfirmedConsumer {
 
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
@@ -28,35 +29,38 @@ public class OrderConfimedConsumer {
     @KafkaListener(topics = "order-confirmed-topic")
     public void handleOrderConfirmedEvent (OrderConfirmedEvent event) {
 
-        Set<Long> productSet = new HashSet<>();
+        List<ProductVariant> variantsToUpdate = new ArrayList<>();
+        Set<Long> affectedProductIds = new HashSet<>();
 
         event.getOrderPlacedItems()
                 .forEach(orderPlacedItem -> {
-                    ProductVariant productVariant = productVariantRepository
+                    ProductVariant variant = productVariantRepository
                             .findByIdAndProductId(orderPlacedItem.getVariantId(),orderPlacedItem.getProductId())
                             .orElse(null);
 
-                    if(productVariant == null) {
+                    if(variant == null) {
                         log.error("Variant not found for productId: {}, variantId: {}",
                                 orderPlacedItem.getProductId(),
                                 orderPlacedItem.getVariantId());
                         return;
                     };
 
-                    productSet.add(orderPlacedItem.getProductId());
+                    variant.setStockCount(variant.getStockCount() - orderPlacedItem.getQuantity());
+                    variantsToUpdate.add(variant);
+                    affectedProductIds.add(orderPlacedItem.getProductId());
 
-                    log.info("Updating stock for productId: {}, variantId: {}", orderPlacedItem.getProductId(), orderPlacedItem.getVariantId());
-
-                    productVariant.setStockCount(productVariant.getStockCount() - orderPlacedItem.getQuantity());
-                    productVariantRepository.save(productVariant);
-
+                    log.info("Queuing stock update for productId: {}, variantId: {}", orderPlacedItem.getProductId(), orderPlacedItem.getVariantId());
                 });
 
-        updateProductStockCount(productSet);
+        // Single batch write
+        productVariantRepository.saveAll(variantsToUpdate);
+        updateProductStockCount(affectedProductIds);
     }
 
-    private void updateProductStockCount(Set<Long> productSet) {
-        for(Long productId : productSet) {
+    private void updateProductStockCount(Set<Long> productIds) {
+        List<Product> productsToUpdate = new ArrayList<>();
+
+        for(Long productId : productIds) {
             List<ProductVariant> variants = productVariantRepository.findByProductId(productId);
 
             if(variants.isEmpty()) continue;
@@ -68,10 +72,13 @@ public class OrderConfimedConsumer {
 
             Product product = variants.getFirst().getProduct();
             product.setStockCount(stockCount);
-            productRepository.save(product);
+            productsToUpdate.add(product);
 
-            log.info("Updated total stock for productId: {} to {}", productId, stockCount);
+            log.info("Queuing total stock update for productId: {} to {}", productId, stockCount);
         }
+
+        // Single batch write
+        productRepository.saveAll(productsToUpdate);
     }
 
 }
