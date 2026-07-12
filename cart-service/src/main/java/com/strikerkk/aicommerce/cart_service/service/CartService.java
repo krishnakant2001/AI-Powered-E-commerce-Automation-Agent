@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,11 +36,10 @@ public class CartService {
     private final CartResilience4j cartResilience4j;
     private final ModelMapper modelMapper;
 
+    @Transactional
     public CartResponse allCartItems() {
         Long userId = Long.valueOf(UserContext.getUserId());
-
         Cart cart = getOrCreateCart(userId);
-
         log.info("Fetching all items in the cart for user_id={}", userId);
 
         boolean isEnriched = syncCartWithLatestProductData(cart);
@@ -47,24 +47,22 @@ public class CartService {
         return mapToCartResponse(cart, isEnriched);
     }
 
-
+    @Transactional
     public CartResponse addItemToCart(AddCartItemRequest request) {
         Long userId = Long.valueOf(UserContext.getUserId());
-
         Cart cart = getOrCreateCart(userId);
 
         Optional<CartItem> existingItemOpt = cartItemRepository
                 .findByCartIdAndProductIdAndVariantId(cart.getId(), request.getProductId(), request.getVariantId());
 
-        if(existingItemOpt.isPresent()) {
+        if (existingItemOpt.isPresent()) {
             updateExistingItem(existingItemOpt.get(), request.getQuantity());
-        }
-        else {
+        } else {
             ProductCartResponse response = cartResilience4j.getItemDetails(request.getProductId(), request.getVariantId());
 
             log.info("Adding new item into the cart");
 
-            if(!response.getInStock()) {
+            if (!response.getInStock()) {
                 throw new IllegalStateException("Product variant is out of stock. productId=" + request.getProductId()
                         + ", variantId=" + request.getVariantId());
             }
@@ -90,7 +88,7 @@ public class CartService {
         return mapToCartResponse(cart);
     }
 
-
+    @Transactional
     public CartItemResponse updateCartItem(@Valid UpdateCartItemRequest request, Long cartItemId) {
 
         CartItem cartItem = cartItemRepository.findById(cartItemId)
@@ -142,6 +140,7 @@ public class CartService {
     }
 
 
+    /** Private helpers */
 
     private Cart getOrCreateCart(Long userId) {
         return cartRepository.findByUserId(userId)
@@ -162,24 +161,37 @@ public class CartService {
 
     private boolean syncCartWithLatestProductData(Cart cart) {
 
-        boolean isUpdated = false;
-
         log.info("Syncing cart items with latest product data");
 
+        List<CartItem> itemToRemove = new ArrayList<>();
+        boolean isUpdated = false;
+
         for(CartItem item : cart.getCartItems()) {
-            ProductCartResponse response = cartResilience4j.getItemDetails(item.getProductId(), item.getVariantId());
+            try {
+                ProductCartResponse response = cartResilience4j.getItemDetails(item.getProductId(), item.getVariantId());
 
-            if(!response.getIsAvailable()) {
-                cartItemRepository.delete(item);
-                isUpdated = true;
-                continue;
-            }
+                if (!response.getIsAvailable()) {
+                    itemToRemove.add(item);
+                    isUpdated = true;
+                    continue;
+                }
 
-            if(!item.getPriceAtAdd().equals(response.getPrice())) {
-                item.setPriceAtAdd(response.getPrice());
-                isUpdated = true;
+                if (!item.getPriceAtAdd().equals(response.getPrice())) {
+                    item.setPriceAtAdd(response.getPrice());
+                    isUpdated = true;
+                }
+
+            } catch (Exception ex) {
+                log.warn("Could not sync productId={}, variantId={} — keeping stale data, Reason: {}",
+                        item.getProductId(), item.getVariantId(), ex.getMessage());
             }
         }
+
+        // avoid concurrent modification
+        if (!itemToRemove.isEmpty()) {
+            cart.getCartItems().removeAll(itemToRemove);
+        }
+
         return isUpdated;
     }
 
