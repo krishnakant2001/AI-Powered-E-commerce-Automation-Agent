@@ -25,6 +25,14 @@ spring:
             - StripPrefix=2
             - AuthenticationFilter
 
+        - id: user-service-oauth2
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/oauth2/**, /users/login/oauth2/**
+          filters:
+            - AuthenticationFilter
+            - PreserveHostHeader
+
         - id: product-service
           uri: lb://PRODUCT-SERVICE
           predicates:

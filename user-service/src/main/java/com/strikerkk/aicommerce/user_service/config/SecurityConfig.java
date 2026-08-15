@@ -2,6 +2,7 @@ package com.strikerkk.aicommerce.user_service.config;
 
 import com.strikerkk.aicommerce.user_service.security.handler.CustomAccessDeniedHandler;
 import com.strikerkk.aicommerce.user_service.security.handler.CustomAuthenticationEntryPoint;
+import com.strikerkk.aicommerce.user_service.security.handler.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
@@ -28,6 +30,9 @@ public class SecurityConfig {
         httpSecurity
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
+                .oauth2Login(oauth2 -> oauth2
+                        .failureUrl("/login?error=true")
+                        .successHandler(oAuth2SuccessHandler))
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                         .accessDeniedHandler(customAccessDeniedHandler)
