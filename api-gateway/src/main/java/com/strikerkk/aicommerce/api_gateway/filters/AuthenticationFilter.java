@@ -23,6 +23,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
     // Paths that skip JWT validation
     private static final List<String> PUBLIC_PATHS = List.of(
+            "/users/",
+            "/users/css/**",
             "/users/auth/signup",
             "/users/auth/login",
             "/payments/webhook/razorpay",

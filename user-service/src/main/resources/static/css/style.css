@@ -1,0 +1,599 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #020617;
+    color: white;
+}
+
+
+/* =========================
+   LOGIN PAGE
+   ========================= */
+
+.page {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* FIX: Added padding so content never touches viewport edges on short screens */
+    padding: 30px 15px;
+
+    background:
+        radial-gradient(circle at 50% 30%, #21105c 0%, transparent 35%),
+        linear-gradient(135deg, #020617, #090b2b);
+}
+
+.login-container {
+    width: 700px;
+
+    /* FIX: Removed hardcoded min-height: 850px — it forced overflow on short/landscape
+       viewports. Content now determines height naturally. */
+
+    text-align: center;
+
+    padding: 50px;
+
+    border: 1px solid #353b70;
+
+    border-radius: 25px;
+
+    background: rgba(10, 14, 45, 0.85);
+
+    box-shadow:
+        0 0 50px rgba(88, 60, 255, 0.2);
+}
+
+
+/* Logo */
+
+.logo {
+    display: flex;
+    justify-content: center;
+}
+
+.cart-icon {
+    width: 80px;
+    height: 80px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 20px;
+
+    /* FIX: Added explicit font-size — was inheriting body default unpredictably */
+    font-size: 28px;
+    font-weight: bold;
+
+    color: #61e7ff;
+
+    border: 2px solid #805cff;
+
+    box-shadow:
+        0 0 25px #5c5cff;
+}
+
+
+.login-container h1 {
+    margin-top: 25px;
+
+    font-size: 48px;
+
+    background: linear-gradient(
+        90deg,
+        #ffffff,
+        #7dd3fc,
+        #a78bfa
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;       /* FIX: Added unprefixed property — -webkit-only omits Firefox */
+    -webkit-text-fill-color: transparent;
+    color: transparent;          /* FIX: Fallback for browsers that don't support text-fill-color */
+}
+
+
+.tagline {
+    margin-top: 10px;
+
+    color: #a8b1d8;
+
+    font-size: 18px;
+}
+
+
+/* Shopping Area */
+
+.shopping-area {
+    height: auto;
+    max-height: 320px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+
+    position: relative;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* FIX: Clip cards that overflow the area on narrow containers */
+    overflow: hidden;
+}
+
+
+.cart {
+    font-size: 70px;
+
+    filter:
+        drop-shadow(0 0 20px #704cff);
+}
+
+
+.floating-card {
+    position: absolute;
+
+    padding: 20px;
+
+    border: 1px solid #5148a0;
+
+    border-radius: 15px;
+
+    background: rgba(30, 28, 75, 0.8);
+
+    color: #cbd5ff;
+
+    font-size: 14px;
+
+    box-shadow:
+        0 0 20px rgba(88, 80, 255, 0.3);
+}
+
+.card-left {
+    left: 20px;
+    top: 70px;
+}
+
+.card-right {
+    right: 20px;
+    top: 100px;
+}
+
+
+/* Login Box */
+
+.login-box {
+    padding: 35px;
+
+    border-radius: 20px;
+
+    border: 1px solid #353b70;
+
+    background: rgba(15, 18, 55, 0.8);
+}
+
+
+.login-box h2 {
+    font-size: 25px;
+
+    background: linear-gradient(
+        90deg,
+        #c084fc,
+        #38bdf8
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;       /* FIX: Added unprefixed fallback */
+    -webkit-text-fill-color: transparent;
+    color: transparent;          /* FIX: Firefox fallback */
+}
+
+
+.login-box p {
+    margin-top: 12px;
+
+    color: #b6bfdc;
+
+    line-height: 1.6;
+}
+
+
+/* Google Button */
+
+.google-button {
+    margin-top: 25px;
+
+    height: 60px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 15px;
+
+    background: white;
+
+    color: #111827;
+
+    text-decoration: none;
+
+    border-radius: 12px;
+
+    font-size: 17px;
+
+    font-weight: 600;
+
+    cursor: pointer;           /* FIX: Missing — anchors styled as buttons need explicit cursor */
+
+    user-select: none;         /* FIX: Prevents accidental text selection on click */
+
+    /* FIX: Both transform AND box-shadow must be in transition — box-shadow was snapping
+       instantly on hover instead of fading */
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+
+.google-button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 25px rgba(255, 255, 255, 0.2);
+}
+
+
+.google-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
+    display: block;
+}
+
+
+.secure-text {
+    margin-top: 20px;
+
+    color: #7f89ad;
+
+    font-size: 14px;
+}
+
+
+/* =========================
+   WELCOME PAGE
+   ========================= */
+
+.welcome-page {
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            circle at 50% 50%,
+            #071a5c 0%,
+            #020617 55%
+        );
+
+    position: relative;
+}
+
+
+/* Header */
+
+.header {
+    height: 80px;
+
+    padding: 0 60px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    border-bottom: 1px solid #202957;
+}
+
+
+.brand {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    font-size: 25px;
+
+    font-weight: bold;
+}
+
+
+.brand-icon {
+    width: 45px;
+    height: 45px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    border-radius: 12px;
+
+    /* FIX: Added explicit font-size so "AI" text renders consistently */
+    font-size: 14px;
+    font-weight: bold;
+
+    color: #67e8f9;
+
+    border: 1px solid #6366f1;
+
+    box-shadow:
+        0 0 20px #4338ca;
+}
+
+
+.user {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    font-size: 16px;
+}
+
+
+.avatar {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    /* FIX: Added explicit font-size — initial letter can render at wrong size */
+    font-size: 18px;
+    font-weight: bold;
+
+    /* FIX: Added flex-shrink: 0 — avatar was compressing when username was long */
+    flex-shrink: 0;
+
+    background: linear-gradient(
+        135deg,
+        #6366f1,
+        #a855f7
+    );
+}
+
+
+/* Main */
+
+.welcome-content {
+    min-height: calc(100vh - 80px);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    padding-top: 90px;
+
+    /* FIX: Added bottom + horizontal padding — content was flush on narrow screens */
+    padding-bottom: 60px;
+    padding-left: 20px;
+    padding-right: 20px;
+
+    text-align: center;
+}
+
+
+.welcome-content h1 {
+    font-size: 60px;
+}
+
+
+.welcome-content h1 span {
+    background: linear-gradient(
+        90deg,
+        #22d3ee,
+        #818cf8,
+        #c084fc
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;       /* FIX: Added unprefixed property */
+    -webkit-text-fill-color: transparent;
+    color: transparent;          /* FIX: Firefox fallback */
+}
+
+
+.welcome-content h2 {
+    margin-top: 15px;
+
+    font-size: 28px;
+
+    font-weight: normal;
+
+    color: #cbd5e1;
+}
+
+
+/* AI World */
+
+.ai-world {
+    /* FIX: Changed from fixed width: 550px to max-width + width: 100%
+       — fixed width caused horizontal overflow on mobile because transform: scale()
+         does NOT remove the element from layout flow; the 550px space was still consumed
+         even after scaling down. Using max-width lets it shrink naturally. */
+    max-width: 550px;
+    width: 100%;
+
+    height: 430px;
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+.glowing-circle {
+    width: 300px;
+    height: 300px;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    position: relative;
+
+    /* FIX: Added flex-shrink: 0 — circle was compressing inside the flex ai-world */
+    flex-shrink: 0;
+
+    border: 2px solid #3b82f6;
+
+    box-shadow:
+        0 0 30px #2563eb,
+        0 0 80px rgba(59, 130, 246, 0.4);
+}
+
+
+.world {
+    font-size: 130px;
+
+    filter:
+        drop-shadow(0 0 20px #22d3ee);
+}
+
+
+.mini-cart {
+    position: absolute;
+
+    font-size: 50px;
+
+    bottom: 25px;
+}
+
+
+.shopping-bag {
+    position: absolute;
+
+    left: 20px;
+
+    bottom: 60px;
+
+    font-size: 70px;
+}
+
+
+.gift {
+    position: absolute;
+
+    right: 20px;
+
+    bottom: 70px;
+
+    font-size: 60px;
+}
+
+
+.robot {
+    position: absolute;
+
+    right: 5px;
+
+    bottom: 0;
+
+    font-size: 85px;
+
+    filter:
+        drop-shadow(0 0 20px #38bdf8);
+}
+
+
+.bottom-text {
+    margin-top: 10px;
+
+    color: #9ca3af;
+
+    font-size: 18px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 768px) {
+
+    .login-container {
+        width: 95%;
+        padding: 30px 20px;
+    }
+
+    .login-container h1 {
+        font-size: 38px;
+    }
+
+    .welcome-content h1 {
+        font-size: 40px;
+    }
+
+    .welcome-content h2 {
+        font-size: 22px;
+    }
+
+    /* FIX: Removed transform: scale(0.75) on .ai-world — transform does not affect
+       layout flow, so the full 550px width remained in the document, still causing
+       horizontal overflow and a dead scroll area. The max-width + width: 100% on
+       .ai-world now handles shrinking correctly without transform. */
+    .ai-world {
+        height: 320px;     /* Reduce height proportionally on mobile */
+    }
+
+    .glowing-circle {
+        width: 200px;
+        height: 200px;
+    }
+
+    .world {
+        font-size: 90px;
+    }
+
+    .mini-cart {
+        font-size: 35px;
+        bottom: 15px;
+    }
+
+    /* Hide side decorations on very narrow screens to prevent overlap */
+    .shopping-bag,
+    .gift {
+        display: none;
+    }
+
+    .robot {
+        font-size: 60px;
+    }
+
+    .header {
+        padding: 0 20px;
+    }
+}

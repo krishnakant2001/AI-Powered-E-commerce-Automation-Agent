@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <!-- FIX: Added meta description -->
+    <meta name="description"
+          content="Welcome to AI-Commerce — your AI-powered shopping experience.">
+
+    <title>AI-Commerce</title>
+
+    <link rel="stylesheet"
+          href="/users/css/style.css">
+
+</head>
+
+<body>
+
+<div class="welcome-page">
+
+    <!-- Header -->
+
+    <header class="header">
+
+        <div class="brand">
+
+            <!-- FIX: Added role="img" + aria-label — same logo mark as login page,
+                 needs an accessible name for screen readers. -->
+            <div class="brand-icon" role="img" aria-label="AI-Commerce logo">
+                AI
+            </div>
+
+            <span>AI-Commerce</span>
+
+        </div>
+
+        <!-- FIX: Added aria-label to identify this as the user navigation area -->
+        <div class="user" aria-label="Signed-in user">
+
+            <!-- FIX 1: The original th:text="${#strings.substring(firstName, 0, 1)}"
+                 throws NullPointerException if firstName is null (expired session,
+                 unauthenticated request that bypassed security, etc.).
+
+                 Fix: Use the Elvis operator (?:) to provide a safe fallback:
+                     ${(firstName ?: 'U')} returns 'U' if firstName is null.
+                 Then take the substring of that guaranteed-non-null value.
+
+                 FIX 2: Added aria-hidden="true" — the avatar initial is decorative;
+                 the adjacent <span> with the full name already identifies the user. -->
+            <div class="avatar"
+                 aria-hidden="true"
+                 th:text="${#strings.substring(firstName ?: 'U', 0, 1)}">
+                U
+            </div>
+
+            <!-- FIX: Same null safety with Elvis operator -->
+            <span th:text="${firstName ?: 'User'}">
+                User
+            </span>
+
+        </div>
+
+    </header>
+
+
+    <!-- Main Content -->
+
+    <!-- FIX: Added aria-labelledby pointing to the h1 so this <main> landmark
+         has a name for screen reader navigation ("main: Welcome, Krishnakant") -->
+    <main class="welcome-content" aria-labelledby="welcome-heading">
+
+        <!-- FIX: Added id="welcome-heading" to satisfy the aria-labelledby reference.
+             Also applied null-safe Elvis operator to the firstName span. -->
+        <h1 id="welcome-heading">
+            Welcome,
+            <span th:text="${firstName ?: 'there'}">
+                there
+            </span>!
+        </h1>
+
+        <!-- FIX: Lowercased "to" for proper sentence style — was "to the ai-ecommerce world"
+             which mixed cases inconsistently. Also changed to title-meaningful copy. -->
+        <h2>
+            Your AI-powered shopping world awaits.
+        </h2>
+
+
+        <!-- AI Shopping Illustration -->
+
+        <!-- FIX: Added aria-hidden="true" to the entire decorative illustration block.
+             The 🌐 🛒 🛍️ 🎁 🤖 emojis are purely decorative. Without aria-hidden,
+             screen readers announce each one: "globe with meridians", "shopping cart",
+             "shopping bags", "wrapped gift", "robot" — which is meaningless noise
+             for a user navigating by landmark or element. -->
+        <div class="ai-world" aria-hidden="true">
+
+            <div class="glowing-circle">
+
+                <div class="world">
+                    🌐
+                </div>
+
+                <div class="mini-cart">
+                    🛒
+                </div>
+
+            </div>
+
+            <div class="shopping-bag">
+                🛍️
+            </div>
+
+            <div class="gift">
+                🎁
+            </div>
+
+            <div class="robot">
+                🤖
+            </div>
+
+        </div>
+
+        <p class="bottom-text">
+            AI-Powered. Customer-Focused. Future-Ready.
+            <!-- FIX: Added aria-hidden to the decorative emoji -->
+            <span aria-hidden="true">💜</span>
+        </p>
+
+    </main>
+
+</div>
+
+</body>
+</html>
