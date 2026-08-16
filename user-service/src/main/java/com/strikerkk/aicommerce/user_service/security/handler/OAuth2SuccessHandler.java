@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -43,18 +44,29 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String oidcIdToken = idToken.getTokenValue();
         log.info("OAuth2.0 idToken: {}", oidcIdToken);
 
+        String subId = oidcUser.getSubject();
         String userEmail = oidcUser.getEmail();
 
-        User user = userRepository.findByEmail(userEmail)
+        User user = userRepository.findByGoogleId(subId)
                 .orElseGet(() -> {
-                    User newUser = User.builder()
-                            .firstName(oidcUser.getGivenName())
-                            .lastName(oidcUser.getFamilyName())
-                            .email(oidcUser.getEmail())
-                            .password(oidcUser.getAccessTokenHash()+"google")
-                            .build();
+                    // check email as fallback to avoid duplicate accounts
+                    return userRepository.findByEmail(userEmail)
+                            .map(existingUser -> {
+                                // link their Google account to existing email account
+                                existingUser.setGoogleId(subId);
+                                return userRepository.save(existingUser);
+                            })
+                            .orElseGet(() -> {
+                                User newUser = User.builder()
+                                        .firstName(oidcUser.getGivenName())
+                                        .lastName(oidcUser.getFamilyName())
+                                        .googleId(subId)
+                                        .email(userEmail)
+                                        .password(UUID.randomUUID().toString())
+                                        .build();
 
-                    return userRepository.save(newUser);
+                                return userRepository.save(newUser);
+                            });
                 });
 
         String jwtToken = jwtService.generateAccessToken(user);

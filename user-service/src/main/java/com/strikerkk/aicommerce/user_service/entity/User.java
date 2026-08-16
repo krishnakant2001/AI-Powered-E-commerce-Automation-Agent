@@ -21,6 +21,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "google_id", unique = true)
+    private String googleId;
+
     @Column(name = "first_name", nullable = false, length = 50)
     private String firstName;
 
