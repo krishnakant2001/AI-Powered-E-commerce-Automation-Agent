@@ -15,6 +15,8 @@ import com.strikerkk.aicommerce.agent_service.entity.enums.ActionType;
 import com.strikerkk.aicommerce.agent_service.entity.enums.MessageRole;
 import com.strikerkk.aicommerce.agent_service.entity.enums.SessionStatus;
 import com.strikerkk.aicommerce.agent_service.exception.AgentException;
+import com.strikerkk.aicommerce.agent_service.exception.SessionNotFoundException;
+import com.strikerkk.aicommerce.agent_service.exception.UnauthorizedSessionAccessException;
 import com.strikerkk.aicommerce.agent_service.llm.SystemPromptBuilder;
 import com.strikerkk.aicommerce.agent_service.llm.ToolDefinitionBuilder;
 import com.strikerkk.aicommerce.agent_service.llm.ToolExecutionService;
@@ -354,8 +356,16 @@ public class AgentChatService {
     // Resolve session - find existing session by using sessionId and userId
     private AgentSession resolveSession(Long userId, UUID sessionId) {
         if(sessionId != null) {
-            return agentSessionRepository.findById(sessionId)
-                    .orElseThrow(() -> new AgentException("Session not found " + sessionId));
+            AgentSession session =  agentSessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new SessionNotFoundException(sessionId.toString()));
+
+            // Make sure the caller actually owns this session
+            if(!session.getUserId().equals(userId)) {
+                log.warn("User {} attempted to access session {} owned by user {}", userId, sessionId, session.getUserId());
+                throw new UnauthorizedSessionAccessException(sessionId.toString());
+            }
+
+            return session;
         }
 
         // Check if user has an active session in Redis
@@ -535,8 +545,8 @@ public class AgentChatService {
     private String buildToolUseContent(String toolUseId, String toolName, String toolInput) {
         return String.format(
                 "[{\"type\":\"tool_use\", \"id\":\"%s\", \"name\":\"%s\", \"input\":\"%s\"}]",
-                toolName,
                 toolUseId,
+                toolName,
                 toolInput
         );
     }

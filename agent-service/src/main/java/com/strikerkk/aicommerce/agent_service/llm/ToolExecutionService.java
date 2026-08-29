@@ -23,7 +23,7 @@ public class ToolExecutionService {
                 case "getProductDetails" -> toolExecutor.getProductDetails(
                        input.path("productId").asLong()
                 );
-                case "getProductItemDetails" -> toolExecutor.getProductItemDetails(
+                case "getVariantInfo", "getProductItemDetails" -> toolExecutor.getProductItemDetails(
                        input.path("productId").asLong(),
                        input.path("variantId").asLong()
                 );
