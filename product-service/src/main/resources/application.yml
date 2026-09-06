@@ -8,3 +8,11 @@ spring:
       properties:
         spring.json:
           trusted.packages: com.strikerkk.aicommerce.*
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+aws:
+  region: ap-south-1
+  s3:
+    bucket-name: s3-ai-ecommerce-982835996581-ap-south-1-an

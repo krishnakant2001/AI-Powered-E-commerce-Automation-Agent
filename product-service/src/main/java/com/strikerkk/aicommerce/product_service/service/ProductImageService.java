@@ -23,6 +23,7 @@ public class ProductImageService {
     private final ProductImageRepository productImageRepository;
     private final ProductRepository productRepository;
     private final ProductOwnershipValidator productOwnershipValidator;
+    private final S3ImageService s3ImageService;
     private final ModelMapper modelMapper;
 
     @Transactional
@@ -35,18 +36,24 @@ public class ProductImageService {
         // Authorization check
         productOwnershipValidator.validate(product);
 
+        // Add Product Image in S3 bucket
+        String imageKey = s3ImageService.uploadImage(request.getImage(), productId.toString());
+
         // Add Product Image
         ProductImage productImage = ProductImage.builder()
                 .product(product)
-                .url(request.getImageUrl())
+                .url(imageKey)        // store the S3 key, not a raw URL
                 .isPrimary(request.getIsPrimary())
                 .build();
 
-        ProductImage savedProductImage = productImageRepository.save(productImage);
-
-        log.info("Create product image of product_id={}", productId);
-
-        return modelMapper.map(savedProductImage, ProductImageResponse.class);
+        try {
+            ProductImage savedProductImage = productImageRepository.save(productImage);
+            return modelMapper.map(savedProductImage, ProductImageResponse.class);
+        } catch (Exception ex) {
+            log.error("DB save failed, cleaning up S3 object. key={}", imageKey);
+            s3ImageService.deleteImage(imageKey); // cleanup
+            throw ex;
+        }
     }
 
     @Transactional
@@ -63,12 +70,16 @@ public class ProductImageService {
         ProductImage productImage = productImageRepository.findByIdAndProductId(imageId, productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Image not found for this product"));
 
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            String newImageKey = s3ImageService.updateImage(request.getImage(), productImage.getUrl(), productId.toString());
+            productImage.setUrl(newImageKey);
+        }
+
         if (Boolean.TRUE.equals(request.getIsPrimary())) {
             productImageRepository.restPrimaryImages(productId);
         }
-        productImage.setIsPrimary(request.getIsPrimary());
-        productImage.setUrl(request.getImageUrl());
 
+        productImage.setIsPrimary(request.getIsPrimary());
         ProductImage updatedImage = productImageRepository.save(productImage);
 
         log.info("Update product image of product_id={} and image_id={}", productId, imageId);
@@ -93,9 +104,15 @@ public class ProductImageService {
         ProductImage productImage = productImageRepository.findByIdAndProductId(imageId, productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Image not found for this product"));
 
-        log.info("Delete product image of product_id={} and image_id={}", productId, imageId);
+        try {
+            s3ImageService.deleteImage(productImage.getUrl());
+        } catch (Exception ex) {
+            log.error("S3 delete failed for key={}", productImage.getUrl());
+            throw ex;
+        }
 
         productImageRepository.delete(productImage);
-    }
 
+        log.info("Delete product image of product_id={} and image_id={}", productId, imageId);
+    }
 }

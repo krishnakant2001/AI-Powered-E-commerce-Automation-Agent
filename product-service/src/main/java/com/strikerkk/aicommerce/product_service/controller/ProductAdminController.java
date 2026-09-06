@@ -13,9 +13,11 @@ import com.strikerkk.aicommerce.product_service.service.ProductVariantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/admin/products")
@@ -109,9 +111,12 @@ public class ProductAdminController {
     // Product image API
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{productId}/add/images")
-    ResponseEntity<ApiResponse<ProductImageResponse>> createProductImage(@Valid @RequestBody ProductImageRequest request,
+    @PostMapping(value = "/{productId}/add/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<ApiResponse<ProductImageResponse>> createProductImage(@RequestPart("image") MultipartFile image,
+                                                                         @RequestPart("isPrimary") String isPrimary,
                                                                          @PathVariable Long productId) {
+
+        ProductImageRequest request = new ProductImageRequest(image, Boolean.parseBoolean(isPrimary));
 
         ProductImageResponse productImageResponse = productImageService.addProductImage(request, productId);
 
@@ -122,10 +127,13 @@ public class ProductAdminController {
 
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{productId}/update/images/{imageId}/primaryImage")
-    ResponseEntity<ApiResponse<ProductImageResponse>> updateProductImage(@Valid @RequestBody ProductImageRequest request,
+    @PutMapping(value = "/{productId}/update/images/{imageId}/primaryImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<ApiResponse<ProductImageResponse>> updateProductImage(@RequestPart("image") MultipartFile image,
+                                                                         @RequestPart("isPrimary") String isPrimary,
                                                                          @PathVariable Long productId,
                                                                          @PathVariable Long imageId) {
+
+        ProductImageRequest request = new ProductImageRequest(image, Boolean.parseBoolean(isPrimary));
 
         ProductImageResponse productImageResponse = productImageService.updateProductImage(request, productId, imageId);
 
