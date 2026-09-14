@@ -1,0 +1,68 @@
+name: Build
+
+on:
+  push:
+    branches: master
+  pull_request:
+    branches: master
+
+env:
+  JAVA_VERSION: '21'
+  JAVA_DISTRIBUTION: 'temurin'
+  SKIP_TESTS: 'true'
+
+jobs:
+  build:
+    name: Build Services
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: maven
+
+      - name: Build agent-service
+        run: |
+          cd agent-service
+          mvn clean install -DskipTests=${{ env.SKIP_TESTS }} -q
+
+      - name: Build api-gateway
+        run: |
+          cd api-gateway
+          mvn clean install -DskipTests=${{ env.SKIP_TESTS }} -q
+
+      - name: Build cart-service
+        run: |
+          cd cart-service
+          mvn clean install -DskipTests=${{ env.SKIP_TESTS }} -q
+
+      - name: Build discovery-server
+        run: |
+          cd discovery-server
+          mvn clean install -DskipTests=${{ env.SKIP_TESTS }} -q
+
+      - name: Build order-service
+        run: |
+          cd order-service
+          mvn clean install -DskipTests=${{ env.SKIP_TESTS }} -q
+
+      - name: Build payment-service
+        run: |
+          cd payment-service
+          mvn clean install -DskipTests=${{ env.SKIP_TESTS }} -q
+
+      - name: Build product-service
+        run: |
+          cd product-service
+          mvn clean install -DskipTests=${{ env.SKIP_TESTS }} -q
+
+      - name: Build user-service
+        run: |
+          cd user-service
+          mvn clean install -DskipTests=${{ env.SKIP_TESTS }} -q
