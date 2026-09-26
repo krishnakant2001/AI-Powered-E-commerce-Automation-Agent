@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -187,7 +188,7 @@ public class AgentSessionService {
         List<MessageResponse> messageResponses = messages
                 .stream()
                 .map(msg -> modelMapper.map(msg, MessageResponse.class))
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
 
         return ConversationHistoryResponse.builder()
                 .sessionId(sessionId)
