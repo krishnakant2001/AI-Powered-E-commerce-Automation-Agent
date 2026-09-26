@@ -33,6 +33,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -228,6 +229,9 @@ public class AgentChatService {
                 agentSessionService.markAsClarifying(sessionId, waitingFor);
                 sessionContext.setPendingClarificationFor(waitingFor);
 
+                // Sync the in-memory entity since markAsClarifying() persists in a separate context
+                session.setStatus(SessionStatus.CLARIFYING);
+
                 sessionContext.getConversationMessages().add(
                         ConversationMessage.builder()
                                 .role("assistant")
@@ -400,7 +404,7 @@ public class AgentChatService {
                         .role(m.getRole() == MessageRole.USER ? "user" : "assistant")
                         .content(m.getContent())
                         .build())
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
 
         SessionContext context = SessionContext.builder()
                 .sessionId(session.getSessionId())
