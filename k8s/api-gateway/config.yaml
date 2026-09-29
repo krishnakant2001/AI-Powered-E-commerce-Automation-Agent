@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: ai-ecommerce
+data:
+  USER_SERVICE_URL: http://user-service:9010
+  PRODUCT_SERVICE_URL: http://localhost:9020
+  CART_SERVICE_URL: http://localhost:9030
+  ORDER_SERVICE_URL: http://localhost:9040
+  PAYMENT_SERVICE_URL: http://localhost:9050
+  AGENT_SERVICE_URL: http://localhost:9060

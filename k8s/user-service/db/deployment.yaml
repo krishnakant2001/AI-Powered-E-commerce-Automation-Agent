@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-user-db
+  namespace: ai-ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-user-db
+
+  template:
+    metadata:
+      labels:
+        app: postgres-user-db
+
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: postgres-user-db-config
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ai-ecommerce-secret
+                  key: DB_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ai-ecommerce-secret
+                  key: DB_PASSWORD
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "256m"
+            requests:
+              memory: "128Mi"
+              cpu: "128m"
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-user-storage
+              mountPath: "/var/lib/postgresql/data"
+
+      volumes:
+        - name: postgres-user-storage
+          persistentVolumeClaim:
+            claimName: postgres-user-data

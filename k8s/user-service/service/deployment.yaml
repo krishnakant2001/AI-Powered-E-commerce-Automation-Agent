@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: ai-ecommerce
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-service
+
+  template:
+    metadata:
+      labels:
+        app: user-service
+
+    spec:
+      containers:
+        - name: user-service
+          image: krishnakant2001/user-service
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-ecommerce-secret
+                  key: JWT_SECRET_KEY
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ai-ecommerce-secret
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ai-ecommerce-secret
+                  key: DB_PASSWORD
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ai-ecommerce-secret
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ai-ecommerce-secret
+                  key: GOOGLE_CLIENT_SECRET
+            - name: DB_SERVICE
+              valueFrom:
+                configMapKeyRef:
+                  name: user-service-config
+                  key: POSTGRES_USER_DB_SERVICE
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "512m"
+            requests:
+              memory: "128Mi"
+              cpu: "256m"
+          ports:
+            - containerPort: 9010

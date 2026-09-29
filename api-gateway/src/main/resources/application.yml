@@ -10,15 +10,15 @@ spring:
     gateway:
       routes:
         - id: agent-service
-          uri: lb://AGENT-SERVICE
+          uri: ${AGENT_SERVICE_URL:http://localhost:9060}
           predicates:
-          - Path=/api/v1/agent/**
+            - Path=/api/v1/agent/**
           filters:
-          - StripPrefix=2
-          - AuthenticationFilter
+            - StripPrefix=2
+            - AuthenticationFilter
 
         - id: user-service
-          uri: lb://USER-SERVICE
+          uri: ${USER_SERVICE_URL:http://localhost:9010}
           predicates:
             - Path=/api/v1/users/**
           filters:
@@ -26,7 +26,7 @@ spring:
             - AuthenticationFilter
 
         - id: user-service-oauth2
-          uri: lb://USER-SERVICE
+          uri: ${USER_SERVICE_URL:http://localhost:9010}
           predicates:
             - Path=/users/oauth2/**, /users/login/oauth2/**
           filters:
@@ -34,16 +34,16 @@ spring:
             - PreserveHostHeader
 
         - id: product-service
-          uri: lb://PRODUCT-SERVICE
+          uri: ${PRODUCT_SERVICE_URL:http://localhost:9020}
           predicates:
             - Path=/api/v1/products/**, /api/v1/admin/products/**
           filters:
             - StripPrefix=2
             - AuthenticationFilter
-#            - RewritePath=/api/v1/(?<segment>.*), /${segment}
+        #            - RewritePath=/api/v1/(?<segment>.*), /${segment}
 
         - id: cart-service
-          uri: lb://CART-SERVICE
+          uri: ${CART_SERVICE_URL:http://localhost:9030}
           predicates:
             - Path=/api/v1/cart/**
           filters:
@@ -51,7 +51,7 @@ spring:
             - AuthenticationFilter
 
         - id: order-service
-          uri: lb://ORDER-SERVICE
+          uri: ${ORDER_SERVICE_URL:http://localhost:9040}
           predicates:
             - Path=/api/v1/orders/**
           filters:
@@ -59,7 +59,7 @@ spring:
             - AuthenticationFilter
 
         - id: payment-service
-          uri: lb://PAYMENT-SERVICE
+          uri: ${PAYMENT_SERVICE_URL:http://localhost:9050}
           predicates:
             - Path=/api/v1/payments/**
           filters:
