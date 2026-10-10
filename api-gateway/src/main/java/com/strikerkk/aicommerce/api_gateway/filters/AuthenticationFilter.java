@@ -53,7 +53,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 //            }
 
 
-            if(!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
+            if(!exchange.getRequest().getHeaders().containsHeader(HttpHeaders.AUTHORIZATION)) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }

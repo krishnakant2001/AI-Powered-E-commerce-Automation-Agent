@@ -168,9 +168,9 @@ class AuthenticationFilterPathMatchingTest {
         StepVerifier.create(filter.filter(exchange, chain)).verifyComplete();
 
         HttpHeaders forwarded = exchange.getRequest().getHeaders();
-        assertThat(forwarded.containsKey("X-user-id")).isFalse();
-        assertThat(forwarded.containsKey("X-user-role")).isFalse();
-        assertThat(forwarded.containsKey("X-user-email")).isFalse();
+        assertThat(forwarded.containsHeader("X-user-id")).isFalse();
+        assertThat(forwarded.containsHeader("X-user-role")).isFalse();
+        assertThat(forwarded.containsHeader("X-user-email")).isFalse();
     }
 
     @Test

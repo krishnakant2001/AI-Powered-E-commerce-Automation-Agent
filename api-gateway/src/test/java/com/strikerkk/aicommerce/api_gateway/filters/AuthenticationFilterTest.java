@@ -377,7 +377,7 @@ class AuthenticationFilterTest {
 
             ServerWebExchange forwarded = captureForwardedExchange();
             assertThat(forwarded).isNotSameAs(exchange);
-            assertThat(exchange.getRequest().getHeaders().containsKey("X-user-id")).isFalse();
+            assertThat(exchange.getRequest().getHeaders().containsHeader("X-user-id")).isFalse();
         }
 
         @Test

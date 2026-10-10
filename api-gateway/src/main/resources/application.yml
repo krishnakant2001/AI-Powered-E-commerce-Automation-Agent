@@ -8,63 +8,65 @@ spring:
 
   cloud:
     gateway:
-      routes:
-        - id: agent-service
-          uri: lb://AGENT-SERVICE
-          predicates:
-          - Path=/api/v1/agent/**
-          filters:
-          - StripPrefix=2
-          - AuthenticationFilter
+      server:
+        webflux:
+          routes:
+            - id: agent-service
+              uri: lb://AGENT-SERVICE
+              predicates:
+              - Path=/api/v1/agent/**
+              filters:
+              - StripPrefix=2
+              - AuthenticationFilter
 
-        - id: user-service
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/api/v1/users/**
-          filters:
-            - StripPrefix=2
-            - AuthenticationFilter
+            - id: user-service
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/api/v1/users/**
+              filters:
+                - StripPrefix=2
+                - AuthenticationFilter
 
-        - id: user-service-oauth2
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/users/oauth2/**, /users/login/oauth2/**
-          filters:
-            - AuthenticationFilter
-            - PreserveHostHeader
+            - id: user-service-oauth2
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/users/oauth2/**, /users/login/oauth2/**
+              filters:
+                - AuthenticationFilter
+                - PreserveHostHeader
 
-        - id: product-service
-          uri: lb://PRODUCT-SERVICE
-          predicates:
-            - Path=/api/v1/products/**, /api/v1/admin/products/**
-          filters:
-            - StripPrefix=2
-            - AuthenticationFilter
-#            - RewritePath=/api/v1/(?<segment>.*), /${segment}
+            - id: product-service
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/api/v1/products/**, /api/v1/admin/products/**
+              filters:
+                - StripPrefix=2
+                - AuthenticationFilter
+    #            - RewritePath=/api/v1/(?<segment>.*), /${segment}
 
-        - id: cart-service
-          uri: lb://CART-SERVICE
-          predicates:
-            - Path=/api/v1/cart/**
-          filters:
-            - StripPrefix=2
-            - AuthenticationFilter
+            - id: cart-service
+              uri: lb://CART-SERVICE
+              predicates:
+                - Path=/api/v1/cart/**
+              filters:
+                - StripPrefix=2
+                - AuthenticationFilter
 
-        - id: order-service
-          uri: lb://ORDER-SERVICE
-          predicates:
-            - Path=/api/v1/orders/**
-          filters:
-            - StripPrefix=2
-            - AuthenticationFilter
+            - id: order-service
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/api/v1/orders/**
+              filters:
+                - StripPrefix=2
+                - AuthenticationFilter
 
-        - id: payment-service
-          uri: lb://PAYMENT-SERVICE
-          predicates:
-            - Path=/api/v1/payments/**
-          filters:
-            - StripPrefix=2
-            - AuthenticationFilter
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/v1/payments/**
+              filters:
+                - StripPrefix=2
+                - AuthenticationFilter
 
 #eureka-configuration
 eureka:
