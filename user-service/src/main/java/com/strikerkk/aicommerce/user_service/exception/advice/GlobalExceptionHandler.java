@@ -4,6 +4,7 @@ import com.strikerkk.aicommerce.user_service.common.ApiResponse;
 import com.strikerkk.aicommerce.user_service.common.ErrorResponse;
 import com.strikerkk.aicommerce.user_service.exception.BadRequestException;
 import com.strikerkk.aicommerce.user_service.exception.ResourceNotFoundException;
+import com.strikerkk.aicommerce.user_service.exception.TooManyAttemptsException;
 import com.strikerkk.aicommerce.user_service.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -83,6 +84,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error("Access denied - you do not have permission."));
+    }
+
+    @ExceptionHandler(TooManyAttemptsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTooManyRequests(RuntimeException ex) {
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

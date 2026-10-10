@@ -5,6 +5,7 @@ import com.strikerkk.aicommerce.user_service.common.ErrorResponse;
 import com.strikerkk.aicommerce.user_service.dto.request.CreateUserRequest;
 import com.strikerkk.aicommerce.user_service.exception.BadRequestException;
 import com.strikerkk.aicommerce.user_service.exception.ResourceNotFoundException;
+import com.strikerkk.aicommerce.user_service.exception.TooManyAttemptsException;
 import com.strikerkk.aicommerce.user_service.exception.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +19,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -125,6 +127,31 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody().getError()).isEqualTo("Invalid email or password");
         assertThat(response.getBody().getPath()).isEqualTo("/auth/login");
         assertThat(response.getBody().getTimestamp()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("TooManyAttemptsException is reported as 429 keeping its message")
+    void shouldHandleTooManyAttemptsException() {
+        ResponseEntity<ApiResponse<Void>> response = handler.handleTooManyRequests(
+                new TooManyAttemptsException("Too many login attempts. Try again later."));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().isSuccess()).isFalse();
+        assertThat(response.getBody().getMessage())
+                .isEqualTo("Too many login attempts. Try again later.");
+        assertThat(response.getBody().getData()).isNull();
+    }
+
+    @Test
+    @DisplayName("the 429 handler is mapped to TooManyAttemptsException")
+    void tooManyAttemptsHandlerIsMapped() throws Exception {
+        ExceptionHandler annotation = GlobalExceptionHandler.class
+                .getDeclaredMethod("handleTooManyRequests", RuntimeException.class)
+                .getAnnotation(ExceptionHandler.class);
+
+        assertThat(annotation).isNotNull();
+        assertThat(annotation.value()).containsExactly(TooManyAttemptsException.class);
     }
 
     @Test

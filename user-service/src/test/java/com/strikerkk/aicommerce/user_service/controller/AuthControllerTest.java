@@ -9,6 +9,7 @@ import com.strikerkk.aicommerce.user_service.dto.response.AuthResponse;
 import com.strikerkk.aicommerce.user_service.dto.response.UserResponse;
 import com.strikerkk.aicommerce.user_service.exception.BadRequestException;
 import com.strikerkk.aicommerce.user_service.exception.ResourceNotFoundException;
+import com.strikerkk.aicommerce.user_service.exception.TooManyAttemptsException;
 import com.strikerkk.aicommerce.user_service.exception.advice.GlobalExceptionHandler;
 import com.strikerkk.aicommerce.user_service.service.AuthService;
 import com.strikerkk.aicommerce.user_service.service.UserService;
@@ -188,6 +189,21 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
                     .andExpect(jsonPath("$.error").value("Invalid email or password"))
                     .andExpect(jsonPath("$.path").value("/auth/login"));
+        }
+
+        @Test
+        @DisplayName("returns 429 when the login rate limit has been exceeded")
+        void shouldReturnTooManyRequestsWhenRateLimited() throws Exception {
+            when(authService.loginUser(any(LoginUserRequest.class)))
+                    .thenThrow(new TooManyAttemptsException("Too many login attempts. Try again later."));
+
+            mockMvc.perform(post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(TestDataFactory.loginUserRequest())))
+                    .andExpect(status().isTooManyRequests())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value("Too many login attempts. Try again later."))
+                    .andExpect(jsonPath("$.data").doesNotExist());
         }
 
         @Test

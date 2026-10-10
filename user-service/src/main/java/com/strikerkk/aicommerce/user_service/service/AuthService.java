@@ -19,14 +19,20 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
+    private final RateLimiterService rateLimiterService;
     private final JwtService jwtService;
     private final ModelMapper modelMapper;
 
     public AuthResponse loginUser(LoginUserRequest request) {
 
+        String compositeKey = "login:email:" + request.getEmail().trim().toLowerCase();
+        rateLimiterService.allowAndRecordAttempts(compositeKey);
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
+
+        rateLimiterService.resetAttempts(compositeKey);
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 

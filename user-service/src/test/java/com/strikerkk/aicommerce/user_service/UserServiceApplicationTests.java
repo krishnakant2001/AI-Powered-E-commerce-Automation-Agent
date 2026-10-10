@@ -12,12 +12,15 @@ import com.strikerkk.aicommerce.user_service.security.handler.OAuth2SuccessHandl
 import com.strikerkk.aicommerce.user_service.security.service.JwtService;
 import com.strikerkk.aicommerce.user_service.service.AddressService;
 import com.strikerkk.aicommerce.user_service.service.AuthService;
+import com.strikerkk.aicommerce.user_service.service.RateLimiterService;
 import com.strikerkk.aicommerce.user_service.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,6 +56,14 @@ class UserServiceApplicationTests {
 		assertThat(applicationContext.getBean(AuthService.class)).isNotNull();
 		assertThat(applicationContext.getBean(AddressService.class)).isNotNull();
 		assertThat(applicationContext.getBean(JwtService.class)).isNotNull();
+		assertThat(applicationContext.getBean(RateLimiterService.class)).isNotNull();
+	}
+
+	@Test
+	@DisplayName("the Redis infrastructure backing the login rate limiter is registered")
+	void redisInfrastructureIsRegistered() {
+		assertThat(applicationContext.getBean(StringRedisTemplate.class)).isNotNull();
+		assertThat(applicationContext.getBean(RedisConnectionFactory.class)).isNotNull();
 	}
 
 	@Test

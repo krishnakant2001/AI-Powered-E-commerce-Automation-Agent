@@ -38,5 +38,19 @@ class CustomExceptionsTest {
         assertThat(exception).isInstanceOf(RuntimeException.class);
         assertThat(exception.getMessage()).isEqualTo("not allowed");
     }
+
+    @Test
+    @DisplayName("TooManyAttemptsException is an unchecked exception that keeps its message")
+    void tooManyAttemptsException() {
+        TooManyAttemptsException exception =
+                new TooManyAttemptsException("Too many login attempts. Try again later.");
+
+        assertThat(exception).isInstanceOf(RuntimeException.class);
+        assertThat(exception.getMessage()).isEqualTo("Too many login attempts. Try again later.");
+        assertThatThrownBy(() -> {
+            throw exception;
+        }).isInstanceOf(TooManyAttemptsException.class)
+                .hasMessage("Too many login attempts. Try again later.");
+    }
 }
 
