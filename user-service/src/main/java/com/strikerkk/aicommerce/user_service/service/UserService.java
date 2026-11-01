@@ -13,6 +13,8 @@ import com.strikerkk.aicommerce.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -40,6 +42,9 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+
+    private static final String CURRENT_USER_KEY =
+            "T(com.strikerkk.aicommerce.user_service.auth.UserContext).getUserId()";
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -87,6 +92,7 @@ public class UserService implements UserDetailsService {
     }
 
 
+    @Cacheable(value = "userDetails", key = CURRENT_USER_KEY)
     public UserResponse userDetails() {
 
         Long userId = Long.valueOf(UserContext.getUserId());
@@ -100,6 +106,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
+    @CacheEvict(value = "userDetails", key = CURRENT_USER_KEY)
     public UserResponse updateUserDetails(UpdateUserDetailsRequest request) {
 
         Long userId = Long.valueOf(UserContext.getUserId());

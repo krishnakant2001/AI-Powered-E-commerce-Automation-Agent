@@ -11,6 +11,8 @@ import com.strikerkk.aicommerce.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,9 @@ public class AddressService {
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
     private final ModelMapper modelMapper;
+
+    private static final String CURRENT_USER_KEY =
+            "T(com.strikerkk.aicommerce.user_service.auth.UserContext).getUserId()";
 
     @Transactional
     public AddressResponse addAddress(AddressRequest request) {
@@ -68,6 +73,7 @@ public class AddressService {
 
     }
 
+    @Cacheable(value = "userAllAddress", key = CURRENT_USER_KEY)
     public List<AddressResponse> allAddresses() {
 
         Long userId = Long.valueOf(UserContext.getUserId());
@@ -83,6 +89,7 @@ public class AddressService {
     }
 
     @Transactional
+    @CacheEvict(value = "userAllAddress", key = CURRENT_USER_KEY)
     public AddressResponse updateAddress(AddressRequest request, Long addressId) {
 
         String userId = UserContext.getUserId();
