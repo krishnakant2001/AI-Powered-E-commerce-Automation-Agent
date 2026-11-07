@@ -8,7 +8,9 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @Entity
-@Table(name = "order_items")
+@Table(name = "order_items", indexes = {
+        @Index(name = "idx_order_items_order_id", columnList = "order_id")
+})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

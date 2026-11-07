@@ -10,7 +10,9 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "product_image")
+@Table(name = "product_image", indexes = {
+        @Index(name = "idx_product_image_product_id", columnList = "product_id")
+})
 public class ProductImage {
 
     @Id

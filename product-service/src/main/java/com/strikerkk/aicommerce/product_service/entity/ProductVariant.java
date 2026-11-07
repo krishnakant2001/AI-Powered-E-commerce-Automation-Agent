@@ -11,7 +11,9 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "product_variant")
+@Table(name = "product_variant", indexes = {
+        @Index(name = "idx_product_variant_product_id", columnList = "product_id")
+})
 public class ProductVariant {
 
     @Id

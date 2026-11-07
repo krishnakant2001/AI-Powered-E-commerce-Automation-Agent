@@ -9,7 +9,9 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_address")
+@Table(name = "user_address", indexes = {
+        @Index(name = "idx_user_address_user_id_default", columnList = "user_id, is_default")
+})
 public class Address {
 
     @Id

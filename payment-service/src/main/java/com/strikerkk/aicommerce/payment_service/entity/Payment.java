@@ -15,7 +15,9 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "payment")
+@Table(name = "payment", indexes = {
+        @Index(name = "idx_payment_order_id", columnList = "order_id")
+})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
